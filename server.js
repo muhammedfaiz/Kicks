@@ -5,9 +5,10 @@ const session = require("express-session");
 const path = require("path");
 const user = require("./routes/users");
 const bodyParser = require("body-parser");
+require('dotenv').config();
 
 // mongoose connection establishment
-const uri = "mongodb://127.0.0.1:27017/Kicks";
+const uri = process.env.URI;
 mongoose.connect(uri);
 
 const db = mongoose.connection;
@@ -46,7 +47,8 @@ app.use((req,res,next)=>{
 app.use("/", user);
 
 // listening app in the port
-app.listen("2500", () => {
+const port = process.env.PORT || 2500
+app.listen(port, () => {
   try {
     console.log(`Server is running on  http://localhost:2500`);
   } catch (error) {

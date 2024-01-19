@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 // Setting up session
 app.use(session({ secret: "mine", resave: false, saveUninitialized: false,cookie:{
-    maxAge:60000,secure:false,httpOnly:true
+    maxAge:60*60*1000,secure:false,httpOnly:true
 } }));
 
 // cach-control middleware

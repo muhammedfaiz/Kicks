@@ -396,14 +396,19 @@
                                         <div class="heading_s1">
                                             <h3 class="mb-30">Otp Verification</h3>
                                         </div>
-                                        
+                                        <% if (error !== 'undefined'){%>
+                                            <div class="error text-danger m-3" id="error"><%= error%></div>
+                                            <%}%>
+                                        <div class="timer-container fw-b m-2 text-center">
+                                            <p class="fw-b text-primary">otp expires in : <span class="timer" id="timer"></span> </p>
+                                        </div>
                                         <form method="post" action="/otp-verify">
                                             <div class="form-group">
-                                                <input type="number" required="" name="email" placeholder="Otp">
+                                                <input type="text" required="" name="otp" placeholder="Otp">
                                             </div>
                                             <div class="form-group d-flex justify-content-between align-items-center">
-                                                <button type="submit" class="btn btn-fill-out btn-block hover-up">Verify</button>
-                                                <a href="/otp-verify">Resend</a>
+                                                <button type="submit" class="btn btn-fill-out btn-block hover-up" id="verify">Verify</button>
+                                                <a href="/otp-verify" id="resend">Resend</a>
                                             </div>
                                         </form>
                                     </div>
@@ -564,6 +569,7 @@
     <script src="/js/plugins/jquery.theia.sticky.js"></script>
     <!-- Template  JS -->
     <script src="/js/main.js"></script>
+    <script src="/js/timer.js"></script>
 </body>
 
 

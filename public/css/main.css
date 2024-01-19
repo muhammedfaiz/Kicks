@@ -64,6 +64,10 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 
+.timer{
+  font-weight: 700;
+}
+
 thead {
   font-weight: 600;
 }

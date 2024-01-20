@@ -1,5 +1,5 @@
 const isLogin = (req,res,next)=>{
-    if(req.session.user_id===undefined){
+    if(!req.session.user_id){
         res.redirect('/login');
     }else{
         next();
@@ -7,7 +7,7 @@ const isLogin = (req,res,next)=>{
 }
 
 const notLogin = (req,res,next)=>{
-    if(req.session.user_id===undefined){
+    if(req.session.user_id){
         res.redirect('/');
     }else{
         next();

@@ -26,6 +26,7 @@ const loginSubmit = async (req,res)=>{
   if(user){
     const passCompare = await bcrypt.compareSync(req.body.password,user.password);
   if(passCompare){
+    req.session.user_id=user._id;
     res.redirect('/');
   }
   }else{
@@ -129,8 +130,23 @@ const otpSubmit = async (req, res) => {
 
 // Home serving
 const homeLoad=(req,res)=>{
-  res.render('frontend/home');
+  try {
+    res.render('frontend/home');
+  } catch (error) {
+    console.log(error);
+  }
 }
+
+// logout
+const logoutHandle = (req,res)=>{
+  try {
+    req.session.destroy();
+    res.redirect('/login');
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 
 module.exports = {
   loginLoad,
@@ -139,5 +155,6 @@ module.exports = {
   submitSignup,
   otpLoad,
   otpSubmit,
-  homeLoad
+  homeLoad,
+  logoutHandle
 };

@@ -394,12 +394,12 @@
                                 <div class="login_wrap widget-taber-content p-30 background-white border-radius-10 mb-md-5 mb-lg-0 mb-sm-5">
                                     <div class="padding_eight_all bg-white">
                                         <div class="heading_s1">
-                                            <h3 class="mb-30">Login</h3>
+                                            <h3 class="mb-30">Admin Login</h3>
                                         </div>
                                         <% if (error !== 'undefined'){%>
                                             <div class="error text-danger m-3" id="error"><%= error%></div>
                                             <%}%>
-                                        <form method="post" action="/login">
+                                        <form method="post" action="/admin">
                                             <div class="form-group">
                                                 <input type="text" required="" name="email" placeholder="Your Email">
                                             </div>
@@ -417,12 +417,7 @@
                                             <div class="form-group">
                                                 <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Log in</button>
                                             </div>
-                                        </form>
-                                        <div class="divider-text-center mt-15 mb-15">
-                                            <span> or</span>
-                                        </div>
-
-                                        <div class="text-muted text-center">Don't have an account? <a href="/signup">Sign in now</a></div>
+                                        </form> 
                                     </div>
                                 </div>
                             </div>

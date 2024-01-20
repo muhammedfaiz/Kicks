@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const path = require("path");
 const user = require("./routes/users");
+const admin = require('./routes/admin');
 const bodyParser = require("body-parser");
 require('dotenv').config();
 
@@ -45,6 +46,10 @@ app.use((req,res,next)=>{
 
 // Routing
 app.use("/", user);
+app.use("/admin",admin);
+app.get('*',(req,res)=>{
+  res.render('frontend/404');
+});
 
 // listening app in the port
 const port = process.env.PORT || 2500

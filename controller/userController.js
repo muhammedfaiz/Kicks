@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const userHelper = require("../helpers/userHelper");
 const otpHelper = require("../helpers/otpHelper");
+const productHelper = require("../helpers/productHelper");
 
 // load login page
 const loginLoad = async (req, res) => {
@@ -97,18 +98,30 @@ const otpSubmit = async (req, res) => {
 };
 
 // Home serving
-const homeLoad = (req, res) => {
+const homeLoad = async(req, res) => {
   try {
-    res.render("frontend/home");
+    const products = await productHelper.activeProductList();
+    res.render("frontend/home",{products:products});
   } catch (error) {
     console.log(error);
   }
 };
 
+// product_view
+const productView = async(req,res)=>{
+  try{
+    let id=req.params.id;
+    const product = await productHelper.selectedProduct(id);
+    res.render('frontend/product-view',{product:product});
+  }catch(error){
+    console.log(error);
+  }
+}
+
 // logout
 const logoutHandle = (req, res) => {
   try {
-    req.session.destroy();
+    delete req.session.userId;
     res.redirect("/login");
   } catch (error) {
     console.log(error);
@@ -123,5 +136,6 @@ module.exports = {
   otpLoad,
   otpSubmit,
   homeLoad,
+  productView,
   logoutHandle,
 };

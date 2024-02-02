@@ -18,6 +18,8 @@ router.post('/otp-verify',middleware.otpTimeExpiry,userController.otpSubmit);
 
 router.get('/',middleware.isLogin,userController.homeLoad);
 
+router.get('/product-view/:id',middleware.isLogin,userController.productView);
+
 router.get('/logout',userController.logoutHandle);
 
 module.exports=router;

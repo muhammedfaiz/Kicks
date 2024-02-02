@@ -25,13 +25,13 @@ const productSchema = mongoose.Schema({
         type:String,
         required:true
     },
-    color:{
-        type:String,
-        required:true
-    },
     stock:{
         type:Number,
         required:true
+    },
+    status:{
+        type:Boolean,
+        default:true
     },
     images:{
         type:Array,

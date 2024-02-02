@@ -36,4 +36,17 @@ const userListHelper = ()=>{
   });
 }
 
-module.exports = {adminGetter,userListHelper};
+const userStatusHelper = (id)=>{
+  return new Promise(async(resolve,reject)=>{
+    try {
+      const user = await User.findById({_id:id});
+      user.status=!user.status;
+      user.save();
+      resolve(user);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+module.exports = {adminGetter,userListHelper,userStatusHelper};

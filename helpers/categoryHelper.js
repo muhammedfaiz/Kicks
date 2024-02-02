@@ -15,18 +15,20 @@ const categoryLoadHelper = () =>{
 const categoryAddHelper = (categoryData) => {
   return new Promise(async (resolve, reject) => {
     let response;
-
-    const category = await Category.create({
-      name: categoryData.categoryName,
-      list: categoryData.list,
-    });
-    if (category) {
-      response = category;
-      resolve(response);
-    }else{
-        response="Could not add category";
-        reject(response);
+    const result = await Category.find({name:categoryData.categoryName});
+    if(!result){
+      const category = await Category.create({
+        name: categoryData.categoryName,
+        list: categoryData.list,
+      });
+      if (category) {
+        response='Category Added'
+        resolve(response);
+      }}else{
+        response="Category already exists";
+        resolve(response);
     }
+    
   });
 };
 
@@ -48,24 +50,28 @@ const categoryEditLoadHelper = (id)=>{
 
 const categoryEditHelper = (id,data)=>{
   return new Promise(async(resolve,reject)=>{
-    const result = await Category.findByIdAndUpdate(id,data);
-    if(result){
-      resolve('Category has been updated');
+        const exist = await Category.findOne({name:data.categoryName})
+    if(!exist){
+      const result = await Category.findByIdAndUpdate(id,{
+        name:data.categoryName,
+        list:data.list
+      });
+      if(result){
+        resolve('Category has been updated');
+      }
     }else{
-      reject("Failed to update");
+      resolve("Category already exists");
     }
   });
 }
 
-const categoryDelete = (id)=>{
+const categoryRemoveHelper = (id)=>{
   return new Promise(async(resolve,reject)=>{
-    let deleteData = await Category.findByIdAndDelete(id);
-    if(deleteData){
-      resolve("Delete success");
-    }else{
-      reject("Could not Delete");
-    }
+    const result = await Category.findById({_id:id});
+    result.list=!result.list;
+    result.save();
+    resolve(result);
   });
 }
 
-module.exports = { categoryAddHelper,categoryLoadHelper,categoryEditLoadHelper,categoryEditHelper,categoryDelete };
+module.exports = { categoryAddHelper,categoryLoadHelper,categoryEditLoadHelper,categoryEditHelper,categoryRemoveHelper };

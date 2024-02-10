@@ -40,23 +40,15 @@ const userSchema = mongoose.Schema({
       },
     ],
   },
-  DOB: {
-    type: Date,
-  },
-  address: {
-    type: Array,
-    default: [
-      {
-        name: null,
-        house: null,
-        city: null,
-        state: null,
-        country: null,
-        mobile: null,
-        address_id: null,
-      },
-    ],
-  },
+  address: [{
+    name:{type:String},
+    house:{type:String},
+    city:{type:String},
+    state:{type:String},
+    country:{type:String},
+    pincode:{type:Number},
+    type:{type:Number}
+  }],
 });
 
 const User = mongoose.model("User", userSchema);

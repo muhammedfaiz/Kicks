@@ -1,0 +1,467 @@
+<%- include("../layout/header.ejs")%>
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="/" rel="nofollow">Home</a>
+                    <span></span> Pages
+                    <span></span> Account
+                </div>
+            </div>
+        </div>
+        <section class="pt-150 pb-150">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 m-auto">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="dashboard-menu">
+                                    <ul class="nav flex-column" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab"
+                                                href="#dashboard" role="tab" aria-controls="dashboard"
+                                                aria-selected="false"><i
+                                                    class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders"
+                                                role="tab" aria-controls="orders" aria-selected="false"><i
+                                                    class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab"
+                                                href="#track-orders" role="tab" aria-controls="track-orders"
+                                                aria-selected="false"><i class="fi-rs-marker mr-10"></i>Add address</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address"
+                                                role="tab" aria-controls="address" aria-selected="true"><i
+                                                    class="fi-rs-marker mr-10"></i>My Address</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab"
+                                                href="#account-detail" role="tab" aria-controls="account-detail"
+                                                aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/logout"><i
+                                                    class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="tab-content dashboard-content">
+                                    <div class="tab-pane fade active show" id="dashboard" role="tabpanel"
+                                        aria-labelledby="dashboard-tab">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Hello <%= data.name%>
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <p>From your account dashboard. you can easily check &amp; view your <a
+                                                        href="#">recent orders</a>, manage your <a href="#">shipping and
+                                                        billing addresses</a> and <a href="#">edit your password and
+                                                        account details.</a></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Your Orders</h5>
+                                            </div>
+                                            <% if (orders!=='undefined') { %>
+                                             
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Order</th>
+                                                                    <th>Date</th>
+                                                                    <th>Status</th>
+                                                                    <th>Total</th>
+                                                                    <th>Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% orders.forEach(order => { %>
+                                                                    <tr>
+                                                                        <td>#<%= order.orderId %></td>
+                                                                        <td><%= order.orderedDate %></td>
+                                                                        <% if (order.status === "Pending") { %>
+                                                                            <td>Processing</td>
+                                                                            <% } else if (order.status === "Shipped") { %>
+                                                                                <td>Shipped</td>
+                                                                            <% } else if (order.status === "Canceled")  { %>
+                                                                                <td>Cancelled</td>
+                                                                                <% } else if (order.status === "Delivered") { %>
+                                                                                    <td>Delivered</td>
+                                                                            <% } %>
+                                                                        <td><%= order.totalPrice%> for <%= order.quantity %> item</td>
+                                                                        <% if (order.status==="Pending") { %>
+                                                                            <td><a onclick= "orderCancel('<%= order._id%>')" class="btn-small d-block text-danger">Cancel</a></td>
+                                                                            <% } else { %>
+                                                                             <td ><span class="badge bg-danger">Cancelled</span></td>
+                                                                        <% } %>
+                                                                    </tr>
+                                                                <% }) %> 
+                                                                
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="text-dark">
+                                                        You haven't Ordered Yet!!
+                                                    </div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="track-orders" role="tabpanel"
+                                        aria-labelledby="track-orders-tab">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Add Address</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <form method="post" action="/add-address" id="addAddress">
+
+                                                    <div class="row">
+                                                        <div class="form-group col-md-12">
+                                                            <label>Name<span class="required">*</span></label>
+                                                            <input  class="form-control square" name="name"
+                                                                type="text" id="address-name">
+                                                                <span id="error-name" class="text-danger m-3"></span>
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>House<span class="required">*</span></label>
+                                                            <input  class="form-control square" name="house"
+                                                                type="text" 
+                                                                id="address-house">
+                                                                <span id="error-house" class="text-danger m-3"></span>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>City<span class="required">*</span></label>
+                                                                <input  class="form-control square"
+                                                                    name="city" type="text" id="address-city">
+                                                                    <span id="error-city" class="text-danger m-3"></span>
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>State<span class="required">*</span></label>
+                                                                <input  class="form-control square"
+                                                                    name="state" type="text" id="address-state">
+                                                                    <span id="error-state" class="text-danger m-3"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>Country<span class="required">*</span></label>
+                                                                <input  class="form-control square"
+                                                                    name="country" type="text" id="address-country">
+                                                                    <span id="error-country" class="text-danger m-3"></span>
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>Pincode<span class="required">*</span></label>
+                                                                <input  class="form-control square"
+                                                                    name="pincode" type="text" id="address-pincode">
+                                                                    <span id="error-pincode" class="text-danger m-3"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4 form-group">
+                                                            <label>Type</label>
+                                                            <select name="type" id="type" class="form-select">
+                                                                <option value="0">Billing address</option>
+                                                                <option value="1">Shipping address</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <button type="submit" class="btn btn-fill-out submit"
+                                                                name="submit" value="Submit">Save</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="address" role="tabpanel"
+                                        aria-labelledby="address-tab">
+                                        <div class="row">
+                                            <% data.address.forEach(item=>{%>
+                                                <% if(item.type===0){%>
+                                                    <div class="col-lg-6 mt-3">
+                                                        <div class="card mb-3 mb-lg-0">
+                                                            <div class="card-header">
+                                                                <h5 class="mb-0">Billing Address</h5>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <p>
+                                                                    <%= item.name%>
+                                                                </p>
+                                                                <address>
+                                                                    <%= item.house%><br>
+                                                                        <%= item.city%>,
+                                                                            <%= item.state%>
+                                                                                <br>
+                                                                                <%= item.pincode%>
+                                                                </address>
+                                                                <p>
+                                                                    <%= item.country%>
+                                                                </p>
+                                                                <a onclick="deleteAddress('<%= item._id %>')"
+                                                                    class="btn-small text-danger">Delete</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <%}else{%>
+                                                        <div class="col-lg-6 mt-3">
+                                                            <div class="card">
+                                                                <div class="card-header">
+                                                                    <h5 class="mb-0">Shipping Address</h5>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <p>
+                                                                        <%= item.name%>
+                                                                    </p>
+                                                                    <address>
+                                                                        <%= item.house%><br>
+                                                                            <%= item.city%>,
+                                                                                <%= item.state%>
+                                                                                    <br>
+                                                                                    <%= item.pincode%>
+                                                                    </address>
+                                                                    <p>
+                                                                        <%= item.country%>
+                                                                    </p>
+                                                                    <a onclick="deleteAddress('<%= item._id %>')"
+                                                                        class="btn-small text-danger">Delete</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <%}%>
+                                                            <%})%>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="account-detail" role="tabpanel"
+                                        aria-labelledby="account-detail-tab">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5>Account Details</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <form method="post" action="/edit-user" id="editUser">
+                                                    <div class="row">
+
+                                                        <div class="form-group col-md-12">
+                                                            <label>Name <span class="required">*</span></label>
+                                                            <span id="error-name" class="text-danger"></span>
+                                                            <input required="" class="form-control square" name="dname"
+                                                                type="text" value="<%= data.name%>" id="name">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Email Address <span class="required">*</span></label>
+                                                            <span id="error-email" class="text-danger"></span>
+                                                            <input required="" class="form-control square" name="email"
+                                                                type="text" value="<%= data.email%>" id="email">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Mobile Number<span class="required">*</span></label>
+                                                            <span id="error-mobile" class="text-danger"></span>
+                                                            <input required="" class="form-control square" name="mobile"
+                                                                type="text" value="<%= data.mobile%>" id="mobile">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Current Password <span
+                                                                    class="required">*</span></label>
+                                                            <span id="error-pass" class="text-danger m-2"></span>
+                                                            <input required="" class="form-control square"
+                                                                name="password" type="password" id="pass">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>New Password <span class="required">*</span></label>
+                                                            <span id="error-npass" class="text-danger"></span>
+                                                            <input class="form-control square" name="npassword"
+                                                                type="password" id="npass">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Confirm Password <span
+                                                                    class="required">*</span></label>
+                                                            <span id="error-cpass" class="text-danger"></span>
+                                                            <input class="form-control square" name="cpassword"
+                                                                type="password" id="cpass">
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <button type="submit" class="btn btn-fill-out submit"
+                                                                name="submit" value="Submit">Save</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function orderCancel(id){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will not get this offer!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/order-cancel/${id}`,
+                        method: "PATCH",
+                    }).done(res => {
+                        Swal.fire('Deleted!', 'Your order has been canceled.', 'success').then(() => {
+                            location.reload();
+                        })
+                    }).fail(err => {
+                        Swal.fire('Cancelled', 'Your Order is safe :)', 'info');
+                    });
+
+                }
+            })
+        }
+
+        $(document).ready(function () {
+            $("#addAddress").submit(function (event) {
+                event.preventDefault();
+                const confirm = validationAddress();
+                if(confirm){
+                    const formData = $(this).serialize();
+                    $.ajax({
+                        url: "/add-address",
+                        method: "PUT",
+                        data: formData,
+                        success: (response) => {
+                            if (response) {
+                                Toastify({
+                                    text: "Address added successfully!",
+                                    duration: 3000, // Customize duration as needed
+                                    gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                                    position: "center", // Align toast (center, left, right)
+                                    style: {
+                                        background: "green", // Green background
+                                    }
+                                }).showToast();
+                                setTimeout(() => { window.location.reload() }, 1500);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $("#editUser").submit(function (event) {
+                event.preventDefault();
+                const confirm = validationUser();
+                if(confirm){
+                    const formData = $(this).serialize();
+                    $.ajax({
+                        url: "/edit-user",
+                        method: "PUT",
+                        data: formData,
+                        success: (response) => {
+                            if (response.status) {
+                                document.getElementById('error-pass').innerHTML = "";
+                                Toastify({
+                                    text: "User details edited successfully!",
+                                    duration: 3000, // Customize duration as needed
+                                    gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                                    position: "center", // Align toast (center, left, right)
+                                    style: {
+                                        background: "green", // Green background
+                                    }
+                                }).showToast();
+                                setTimeout(() => { window.location.reload() }, 1500);
+                                console.log(response);
+                            } else {
+                                document.getElementById('error-pass').innerHTML = "Password is incorrect";
+                            }
+                        },
+    
+                    });
+                }
+
+            });
+        });
+
+        function validationUser() {
+            const nameRegex = /^[a-zA-Z\s]+$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const mobileRegex = /^\d{10}$/;
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+            let isValid=true
+            if (!nameRegex.test(document.getElementById("name").value)) {
+                document.getElementById("error-name").innerHTML = "Name should only contain letters and spaces.";
+                isValid=false;
+            }else{
+                document.getElementById("error-name").innerHTML='';
+            }
+            if (!emailRegex.test(document.getElementById("email").value)) {
+                document.getElementById("error-email").innerHTML = "Email is incorrect";
+                isValid=false;
+            }else{
+                document.getElementById("error-email").innerHTML =""
+            }
+            if (!mobileRegex.test(document.getElementById("mobile").value)) {
+                document.getElementById("error-mobile").innerHTML = "Mobile Number is incorrect";
+                isValid=false;
+            }else{
+                document.getElementById("error-mobile").innerHTML = ""
+            }
+            if (document.getElementById("npass").value && !passwordRegex.test(document.getElementById("npass").value)) {
+                document.getElementById("error-npass").innerHTML = "Password should contain 8 elements with alphabets,numbers and special characters";
+                isValid=false;
+            } else if (document.getElementById("npass").value && document.getElementById("npass").value !== document.getElementById("cpass").value) {
+                document.getElementById("error-npass").innerHTML = "Password doesnt match";
+                isValid=false;
+            }else{
+                document.getElementById("error-npass").innerHTML="";
+            }
+            return isValid;
+        }
+
+        function deleteAddress(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will not be able to recover this address!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/delete-address/${id}`,
+                        method: "PUT",
+                    }).done(res => {
+                        Swal.fire('Deleted!', 'Your address has been deleted.', 'success').then(() => {
+                            location.reload();
+                        })
+                    }).fail(err => {
+                        Swal.fire('Cancelled', 'Your address is safe :)', 'info');
+                    });
+
+                }
+            })
+        }
+    </script>
+    <%- include("../layout/footer.ejs")%>

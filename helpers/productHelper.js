@@ -1,6 +1,6 @@
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
-const { default: mongoose } = require("mongoose");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 const productAddHelper = (data, files) => {
   return new Promise(async (resolve, reject) => {
@@ -12,15 +12,26 @@ const productAddHelper = (data, files) => {
           contentType: file.mimetype,
         });
       }
-
       let newProduct = await Product.create({
         name: data.name,
         brandName: data.brandName,
         description: data.description,
         price: Number(data.price),
-        offerPrice: Number(data.offerPrice),
-        size: data.size,
-        stock: Number(data.stock),
+        discount: Number(data.discount),
+        stock: [
+          {
+            size: "S",
+            quantity: Number(data.smallQuantity),
+          },
+          {
+            size: "M",
+            quantity: Number(data.mediumQuantity),
+          },
+          {
+            size: "L",
+            quantity: Number(data.largeQuantity),
+          },
+        ],
         category: new mongoose.Types.ObjectId(data.category),
         images: productImage,
       });
@@ -41,7 +52,47 @@ const productCategoryList = () => {
 
 const productListHelper = () => {
   return new Promise(async (resolve, reject) => {
-    const products = await Product.find().populate("category");
+    const products = await Product.aggregate([
+      {
+        $unwind: "$stock",
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          brandName: { $first: "$brandName" },
+          description: { $first: "$description" },
+          price: { $first: "$price" },
+          discount: { $first: "$discount" },
+          status: { $first: "$status" },
+          images: { $first: "$images" },
+          quantity: { $sum: "$stock.quantity" },
+          category: { $first: "$category" },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          as: "category",
+          localField: "category",
+          foreignField: "_id",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          brandName: 1,
+          description: 1,
+          price: 1,
+          discount: 1,
+          status: 1,
+          images: 1,
+          quantity: 1,
+          category: { $arrayElemAt: ["$category", 0] },
+        },
+      },
+    ]);
     if (products) {
       resolve(products);
     } else {
@@ -50,24 +101,26 @@ const productListHelper = () => {
   });
 };
 
-const activeProductList = ()=>{
+const activeProductList = () => {
   return new Promise(async (resolve, reject) => {
-    const products = await Product.find().populate("category");
-    var actProd=products.map((item)=>{
-      if(item.category && item.category.list){
-        if(item.status){
-          return item;
-        }
-      }
-      return null;
-    }).filter(Boolean);
-    if (actProd) {
-      resolve(actProd);
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "categories",
+          as: "category",
+          localField: "category",
+          foreignField: "_id",
+        },
+      },
+      { $match: { status: true, "category.list": true } },
+    ]);
+    if (products) {
+      resolve(products);
     } else {
       reject("No products found");
     }
   });
-}
+};
 
 const productStatusHelper = (id) => {
   return new Promise(async (resolve, reject) => {
@@ -86,34 +139,98 @@ const productEditHelper = (id, data, files) => {
   return new Promise(async (resolve, reject) => {
     try {
       const productImage = [];
+
       for (let file of files) {
         productImage.push({
           data: file.filename,
           contentType: file.mimetype,
         });
       }
-      const exist = await Product.findOne({name:data.name});
-      if(!exist){
-        const updateProduct = await Product.findByIdAndUpdate(
-          id,
-          {
-            name: data.name,
-            brandName: data.brandName,
-            description: data.description,
-            price: Number(data.price),
-            offerPrice: Number(data.offerPrice),
-            size: data.size,
-            color: data.color,
-            stock: Number(data.stock),
-            category: new mongoose.Types.ObjectId(data.category),
-            images: productImage,
-          },
-          { new: true }
-        );
-        if (updateProduct) {
-          resolve("Product Edited");
-        }
+      const exist = await Product.findOne({ name: data.name });
+      const existId = ""+exist._id
+    if (!exist) {
+      let updateProduct = {
+        stock: [],
+      };
+      if (data.name) {
+        updateProduct.name = data.name;
       }
+      if (data.brandName) {
+        updateProduct.brandName = data.brandName;
+      }
+      if (data.description) {
+        updateProduct.description = data.description;
+      }
+      if (data.price) {
+        updateProduct.price = data.price;
+      }
+      if (data.discount) {
+        updateProduct.offerPrice = data.discount;
+      }
+      if (data.smallQuantity) {
+        updateProduct.stock.push({ size: "S", quantity: data.smallQuantity });
+      }
+      if (data.mediumQuantity) {
+        updateProduct.stock.push({
+          size: "M",
+          quantity: data.mediumQuantity,
+        });
+      }
+      if (data.largeQuantity) {
+        updateProduct.stock.push({ size: "L", quantity: data.largeQuantity });
+      }
+      if (productImage.length >= 4) {
+        updateProduct.images = productImage;
+      }
+      const updatedProduct = await Product.updateOne(
+        { _id: id },
+        { $set: updateProduct }
+      );
+      resolve("Product Edited");
+    
+
+    } else if(exist && existId == id) {
+      let updateProduct = {
+        stock: [],
+      };
+      if (data.name) {
+        updateProduct.name = data.name;
+      }
+      if (data.brandName) {
+        updateProduct.brandName = data.brandName;
+      }
+      if (data.description) {
+        updateProduct.description = data.description;
+      }
+      if (data.price) {
+        updateProduct.price = data.price;
+      }
+      if (data.discount) {
+        updateProduct.offerPrice = data.discount;
+      }
+      if (data.smallQuantity) {
+        updateProduct.stock.push({ size: "S", quantity: data.smallQuantity });
+      }
+      if (data.mediumQuantity) {
+        updateProduct.stock.push({
+          size: "M",
+          quantity: data.mediumQuantity,
+        });
+      }
+      if (data.largeQuantity) {
+        updateProduct.stock.push({ size: "L", quantity: data.largeQuantity });
+      }
+      if (productImage.length >= 4) {
+        updateProduct.images = productImage;
+      }
+      const updatedProduct = await Product.updateOne(
+        { _id: id },
+        { $set: updateProduct }
+      );
+      resolve("Product Edited");
+    }else{
+        resolve("Product already exists");
+    }
     } catch (error) {
       reject(error);
     }
@@ -134,15 +251,22 @@ const productDeleteHelper = (id) => {
 const selectedProduct = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const product = await Product.findById(id).populate('category');
+      const product = await Product.findById(id).populate("category");
       if ((product._id = id)) {
         resolve(product);
       } else {
         reject("Product not found");
       }
     } catch (error) {
-      console.log (error);
+      console.log(error);
     }
+  });
+};
+
+const currencyFormatter = (amount) => {
+  return Number(amount).toLocaleString("en-in", {
+    style: "currency",
+    currency: "INR",
   });
 };
 
@@ -155,4 +279,5 @@ module.exports = {
   productDeleteHelper,
   selectedProduct,
   activeProductList,
+  currencyFormatter,
 };

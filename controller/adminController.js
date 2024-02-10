@@ -1,8 +1,11 @@
 const adminHelper = require("../helpers/adminHelper");
+const userHelper = require("../helpers/userHelper");
 const categoryHelper = require("../helpers/categoryHelper");
+const orderHelper = require('../helpers/orderHelper');
 const productHelper = require("../helpers/productHelper");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
+const moment = require("moment");
 
 // Login load
 const loginLoad = async (req, res) => {
@@ -242,6 +245,51 @@ const userStatus = async(req,res)=>{
   }
 }
 
+const orderList = async(req,res)=>{
+  try {
+    const orders = await orderHelper.getAllOrders();
+    for(let order of orders) {
+      const totalPrice = productHelper.currencyFormatter(order.total);
+      orders.totalPrice = totalPrice;
+      const formatedDate = moment(order.orderedOn).format("MMMM Do,YYYY");
+      order.OrderedDate = formatedDate;
+    }
+    res.render('backend/orderList',{orders:orders});
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const orderDetails = async(req,res)=>{
+  try {
+    const orderId = req.params.id;
+    const details = await orderHelper.orderDetailsHelper(orderId);
+    details.orderedDate = moment(details.orderedOn).format("MMMM Do,YYYY");
+    for(let item of details.items) {
+      const price = Math.round(item.price);
+      const subTotal = price*item.quantity;
+      item.subTotal = productHelper.currencyFormatter(subTotal);
+      item.offerPrice=productHelper.currencyFormatter(price)
+    }
+    details.totalAmount = productHelper.currencyFormatter(details.total);
+    res.render('backend/orderDetails',{details:details});
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const changeOrderStatus = async(req,res)=>{
+  try {
+    const orderId = req.params.id;
+    const result = await  orderHelper.changeOrderStatusHelper(orderId,req.body);
+    if(result){
+      res.json({status:true});
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   loginLoad,
   loginSubmit,
@@ -261,5 +309,8 @@ module.exports = {
   categoryEdit,
   categoryRemove,
   userList,
+  orderList,
   userStatus,
+  orderDetails,
+  changeOrderStatus
 };

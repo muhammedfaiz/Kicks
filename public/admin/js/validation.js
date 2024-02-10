@@ -5,13 +5,15 @@ function productValidation(event) {
   let description = document.getElementById("description");
   let price = document.getElementsByName("price")[0];
   let offerPrice = document.getElementsByName("offerPrice")[0];
-  let size = document.getElementsByName("size")[0];
+  let discount = document.getElementsByName("discount")[0];
+  let smQuantity = document.getElementsByName("smallQuantity")[0];
+  let mdQuantity = document.getElementsByName("mediumQuantity")[0];
+  let lgQuantity = document.getElementsByName("largeQuantity")[0];
 
   let stock = document.getElementsByName("stock")[0];
   let images = document.getElementsByName("images")[0];
-
+  let isValid = true;
   const priceRegex = /^[1-9]\d*$/;
-  const sizeRegex = /^(6|7|8|9|10|11|12)$/;
   const alphaRegex = /^[A-Za-z]+$|^[^-]\d+$/;
 
   const stockRegex = /^([0-9]\d)$/;
@@ -26,27 +28,39 @@ function productValidation(event) {
     !stock.value
   ) {
     error.innerHTML = "Every field is required!!";
-    return false;
+    isValid = false;
   }
 
-  if (!price.value.match(priceRegex) || !offerPrice.value.match(priceRegex)) {
-    error.innerHTML = "Price should be a positive number except 0";
-    return false;
-  } else if (!productName.value.match(alphaRegex)) {
-    error.innerHTML = "Product Name can only be alphabet and number";
-    return false;
-  }else if(!brandName.value.match(alphaRegex)){
-    error.innerHTML = "Brand Name can only be alphabet and number";
-    return false;
-  } else if (!size.value.match(sizeRegex)) {
-    error.innerHTML = "size should be between 6-12";
-    return false;
-  } else if (!stock.value.match(stockRegex)) {
-    error.innerHTML = "Enter the correct stock";
-    return false;
+  if (!price.value.match(priceRegex)) {
+    document.getElementById("error-price").innerHTML = "Price should be a positive number except 0";
+    isValid = false;
+  } 
+  if (!discount.value.match(priceRegex)) {
+    document.getElementById("error-discount").innerHTML = "Discount should be a positive number except 0";
+    isValid = false;
+  } 
+   if (!productName.value.match(alphaRegex)) {
+    document.getElementById("error-prod_name").innerHTML = "Product Name can only be alphabet and number";
+    isValid = false;
   }
+   if(!brandName.value.match(alphaRegex)){
+    document.getElementById("error-brand_name").innerHTML = "Brand Name can only be alphabet and number";
+    isValid = false;
+  } 
+    if (!smQuantity.value.match(stockRegex)) {
+      document.getElementById("error-sm").innerHTML = "Enter the correct quantity";
+    isValid = false;
+  }
+  if (!mdQuantity.value.match(stockRegex)) {
+    document.getElementById("error-md").innerHTML = "Enter the correct quantity";
+  isValid = false;
+}
+if (!lgQuantity.value.match(stockRegex)) {
+  document.getElementById("error-lg").innerHTML = "Enter the correct quantity";
+isValid = false;
+}
   console.log("validation success");
-  return true;
+  return isValid;
 }
 
 document
@@ -56,7 +70,7 @@ document
   });
 
 function categoryValidation(event) {
-  let error = document.getElementById("error");
+  let error = document.getElementById("error-category");
   let categoryName = document.getElementById("category_name");
 
   let nameRegex = /^[a-zA-Z]+$/;

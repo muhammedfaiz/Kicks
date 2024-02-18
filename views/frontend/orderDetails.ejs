@@ -1,0 +1,232 @@
+<%- include("../layout/header.ejs") %>
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="index.html" rel="nofollow">Home</a>
+                    <span></span> Orders
+                    <span></span> Order Details
+                </div>
+            </div>
+        </div>
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-12 my-3">
+                        <div class="table-responsive">
+                            <% if(typeof data !=="undefined" && data.items.length>0 ) {%>
+                                <table class="table shopping-summery text-center clean">
+                                    <thead>
+                                        <tr class="main-heading">
+                                            <th scope="col">Image</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Size</th>
+                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% data.items.forEach((item, index)=> { %>
+                                            <tr>
+                                                <td class="image product-thumbnail"><img
+                                                        src="/uploads/<%= item.product.images[0].data%>"
+                                                        alt="product-img"></td>
+                                                <td class="product-des product-name">
+                                                    <h5 class="product-name"><a href="shop-product-right.html">
+                                                            <%= item.product.name%>
+                                                        </a></h5>
+                                                    <p class="font-xs">
+                                                        <%= item.product.brandName%>
+                                                    </p>
+                                                </td>
+                                                <td class="size" data-title="Size"><span id="price">
+                                                        <%= item.size%>
+                                                    </span></td>
+
+                                                <td class="text-center" data-title="Stock">
+                                                    <div class="detail-qty border radius  m-auto">
+                                                        <span class="qty-val" id="qty-<%= item._id%>">
+                                                            <%= item.quantity%>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <% if (item.status==="Pending" ) { %>
+
+                                                    <td class="status" data-title="Status"><span id="status"
+                                                            class="badge bg-warning">
+                                                            Processing
+                                                        </span></td>
+                                                    <td class="action" data-title="Remove"><a class="text-danger"
+                                                            onclick="orderCancel('<%= data._id%>','<%= item._id%>')">Cancel</a>
+                                                    </td>
+                                                    <% } else if (item.status==="Shipped" ) { %>
+                                                        <td class="status" data-title="Status"><span id="status"
+                                                                class="badge bg-warning">
+                                                                Shipping
+                                                            </span></td>
+                                                        <td class="action" data-title="Remove"><a class="text-danger"
+                                                                onclick="orderCancel('<%= data._id%>','<%= item._id%>')">Cancel</a>
+                                                        </td>
+                                                        <% } else if (item.status==="Delivered" ) { %>
+                                                            <td class="status" data-title="Status"><span id="status"
+                                                                    class="badge bg-success">
+                                                                    Delivered
+                                                                </span></td>
+                                                            <td class="action" data-title="Remove"><a
+                                                                    class="text-primary"
+                                                                    onclick="orderReturn('<%= data._id%>','<%= item._id%>')">Return</a>
+                                                            </td>
+                                                            <% } else if (item.status==="Return" ) { %>
+                                                                <td class="status" data-title="Status"><span id="status"
+                                                                        class="badge bg-primary">
+                                                                        Returning
+                                                                    </span></td>
+                                                                <% } else if (item.status==="Returned" ) { %>
+                                                                    <td class="status" data-title="Status"><span
+                                                                            id="status" class="badge bg-success">
+                                                                            Returned
+                                                                        </span></td>
+                                                                    <% } else if (item.status==="Canceled" ) { %>
+                                                                        <td class="status" data-title="Status"><span
+                                                                                id="status" class="badge bg-danger">
+                                                                                Canceled
+                                                                            </span></td>
+                                                                        <% } %>
+                                            </tr>
+                                            <%})%>
+                                    </tbody>
+                                </table>
+                                <%}%>
+                        </div>
+                        <div class="cart-action text-end">
+                            <a class="btn " href="/"><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
+                        </div>
+                        <div class="divider center_icon mt-50 mb-50"><i class="fi-rs-fingerprint"></i></div>
+                        <div class="row mb-50">
+                            <div class="col-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="text-dark">Address</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Name:</strong>
+                                            <%= data.address.name %>
+                                        </p>
+                                        <p><strong>House:</strong>
+                                            <%= data.address.house %>
+                                        </p>
+                                        <p><strong>City:</strong>
+                                            <%= data.address.city %>
+                                        </p>
+                                        <p><strong>State:</strong>
+                                            <%= data.address.state %>
+                                        </p>
+                                        <p><strong>Country:</strong>
+                                            <%= data.address.country %>
+                                        </p>
+                                        <p><strong>Pincode:</strong>
+                                            <%= data.address.pincode %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <% if(typeof data !=="undefined" && data.items.length>0 ){ %>
+                                <div class="col-lg-6 col-md-12">
+                                    <div class="border p-md-4 p-30 border-radius cart-totals">
+                                        <div class="heading_s1 mb-3">
+                                            <h4>Order Totals</h4>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="cart_total_label">Order Subtotal</td>
+                                                        <td class="cart_total_amount"><span
+                                                                class="font-lg fw-900 text-brand" id="total_amount">
+                                                                <%= data.orderTotal%>
+                                                            </span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="cart_total_label">Shipping</td>
+                                                        <td class="cart_total_amount"> <i class="ti-gift mr-5"></i> Free
+                                                            Shipping</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="cart_total_label">Total</td>
+                                                        <td class="cart_total_amount"><strong><span
+                                                                    class="font-xl fw-900 text-brand" id="allTotal">
+                                                                    <%= data.orderTotal%>
+                                                                </span></strong>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <% }%>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function orderCancel(orderId, itemId) {
+            console.log(orderId, itemId)
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will not get this offer!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/order-cancel/${orderId}/${itemId}`,
+                        method: "PATCH",
+                    }).done(res => {
+                        Swal.fire('Deleted!', 'Your order has been canceled.', 'success').then(() => {
+                            location.reload();
+                        })
+                    }).fail(err => {
+                        Swal.fire('Cancelled', 'Your Order is safe :)', 'info');
+                    });
+
+                }
+            })
+        }
+
+        function orderReturn(orderId, itemId) {
+            Swal.fire({
+                title: 'Are you sure to return?',
+                text: 'You will not get this offer!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Return it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/order-return/${orderId}/${itemId}`,
+                        method: "PATCH",
+                    }).done(res => {
+                        Swal.fire('Return success!', 'Your order has been returned.', 'success').then(() => {
+                            location.reload();
+                        })
+                    }).fail(err => {
+                        Swal.fire('Cancelled', 'Your Order is safe :)', 'info');
+                    });
+
+                }
+            })
+        }
+    </script>
+    <%- include("../layout/footer.ejs") %>

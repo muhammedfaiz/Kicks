@@ -8,6 +8,11 @@ const orderSchema = new mongoose.Schema({
       quantity: { type: Number },
       size: { type: String },
       price:{type:Number},
+      status: {
+        type: String,
+        enum: ["Pending", "Shipped", "Delivered", "Canceled","Return","Returned"],
+        default: "Pending",
+      },
     },
   ],
   address: {
@@ -21,11 +26,6 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: { type: String },
   orderedOn: { type: Date, default: Date.now },
-  status: {
-    type: String,
-    enum: ["Pending", "Shipped", "Delivered", "Canceled"],
-    default: "Pending",
-  },
   orderId: {
     type: Number,
     default: function () {
@@ -35,7 +35,9 @@ const orderSchema = new mongoose.Schema({
   deliveredOn: {
     type: Date,
   },
+  
   total: { type: Number },
+  coupon:{type:String}
 });
 
 const Order = mongoose.model("Order", orderSchema);

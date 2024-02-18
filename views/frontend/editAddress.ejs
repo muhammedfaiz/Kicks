@@ -1,0 +1,71 @@
+<%- include("../layout/header.ejs") %>
+    <% if (user!=='undefined' ) { %>
+        <div class="row m-5">
+            <div class="col-md-8 m-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Edit Address</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="/edit-address/<%= address._id%>?_method=PUT" id="addAddress">
+                            <input type="hidden" name="_method" value="PUT">
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label>Name<span class="required">*</span></label>
+                                    <input class="form-control square" name="name" type="text" id="address-name"
+                                        value="<%= address.name%>">
+                                    <span id="error-name" class="text-danger m-3"></span>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label>House<span class="required">*</span></label>
+                                    <input class="form-control square" name="house" type="text" id="address-house"
+                                        value="<%= address.house%>">
+                                    <span id="error-house" class="text-danger m-3"></span>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>City<span class="required">*</span></label>
+                                        <input class="form-control square" name="city" type="text" id="address-city"
+                                            value="<%= address.city%>">
+                                        <span id="error-city" class="text-danger m-3"></span>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>State<span class="required">*</span></label>
+                                        <input class="form-control square" name="state" type="text" id="address-state"
+                                            value="<%= address.state%>">
+                                        <span id="error-state" class="text-danger m-3"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Country<span class="required">*</span></label>
+                                        <input class="form-control square" name="country" type="text"
+                                            id="address-country" value="<%= address.country%>">
+                                        <span id="error-country" class="text-danger m-3"></span>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Pincode<span class="required">*</span></label>
+                                        <input class="form-control square" name="pincode" type="text"
+                                            id="address-pincode" value="<%= address.pincode%>">
+                                        <span id="error-pincode" class="text-danger m-3"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Type</label>
+                                    <select name="type" id="type" class="form-select">
+                                        <option value="0">Billing address</option>
+                                        <option value="1">Shipping address</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-fill-out submit" name="submit"
+                                        value="Submit">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+            <%- include("../layout/footer.ejs") %>

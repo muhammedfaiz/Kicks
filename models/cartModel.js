@@ -14,6 +14,9 @@ const cartSchema = mongoose.Schema({
     }],
     total:{
         type:Number, 
+    },
+    coupon:{
+        type:String,
     }
 });
 

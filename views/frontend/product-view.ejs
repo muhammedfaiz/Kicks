@@ -128,10 +128,18 @@
                                                                 onclick="addCart('<%= product._id%>')">Add to
                                                                 cart</button>
                                                             <%}%>
+                                                            <% if (list === true) { %>
+                                                                <a aria-label="Add To Wishlist"
+                                                                class="action-btn hover-up"
+                                                                style="background-color: #9D6948;"
+                                                                onclick="removeWishList('<%= product._id %>')"><i
+                                                                    class="fi-rs-heart"></i></a>
+                                                             <% } else { %> 
                                                                 <a aria-label="Add To Wishlist"
                                                                     class="action-btn hover-up"
-                                                                    href="shop-wishlist.html"><i
+                                                                    onclick="addWishList('<%= product._id %>')"><i
                                                                         class="fi-rs-heart"></i></a>
+                                                            <% } %>
                                                 </div>
                                             </div>
                                             <ul class="product-meta font-xs color-grey mt-50">
@@ -555,6 +563,74 @@
 
         function veiwCart(){
             location.href='/cart';
+        }
+
+        function addWishList (prodId){
+            $.ajax({
+                url:`/wish-list/${prodId}`,
+                method:"PUT",
+                success:(response)=>{
+                    if(response.status){
+                        Toastify({
+                            text: "Product added to wishlist successfully!",
+                            duration: 3000, // Customize duration as needed
+                            gravity: "bottom", // Choose placement (top, top-left, top-right, bottom, etc.)
+                            position: "center", // Align toast (center, left, right)
+                            style: {
+                                background: "green",
+                             } // Green background
+                        }).showToast();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
+                    }else {
+                        Toastify({
+                            text: "Failed to add product to wishlist. Please try again.",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "center",
+                            style: {
+                                background: "#f44336", // Red background
+                                color: "#fff"
+                            }
+                        }).showToast();
+                    }
+                }
+            })
+        }
+
+        function removeWishList(prodId){
+            $.ajax({
+                url:'/removeWishList/'+prodId,
+                method:"PATCH",
+                success:(response)=>{
+                    if(response.status){
+                        Toastify({
+                            text: "Product removed from wishlist successfully!",
+                            duration: 3000, // Customize duration as needed
+                            gravity: "bottom", // Choose placement (top, top-left, top-right, bottom, etc.)
+                            position: "center", // Align toast (center, left, right)
+                            style: {
+                                background: "green",
+                             } // Green background
+                        }).showToast();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
+                    }else {
+                        Toastify({
+                            text: "Failed to add product to wishlist. Please try again.",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "center",
+                            style: {
+                                background: "#f44336", // Red background
+                                color: "#fff"
+                            }
+                        }).showToast();
+                    }
+                }
+            })
         }
     </script>
     <%- include('../layout/footer.ejs')%>

@@ -11,30 +11,35 @@
         </div>
         <section class="mt-50 mb-50">
             <div class="container">
-                <!-- <div class="row">
-                    
+                <div class="row">
+
                     <div class="col-lg-6">
                         <div class="toggle_info">
-                            <span><i class="fi-rs-label mr-10"></i><span class="text-muted">Have a coupon?</span> <a href="#coupon" data-bs-toggle="collapse" class="collapsed" aria-expanded="false">Click here to enter your code</a></span>
+                            <span><i class="fi-rs-label mr-10"></i><span class="text-muted">Have a coupon?</span> <a
+                                    href="#coupon" data-bs-toggle="collapse" class="collapsed"
+                                    aria-expanded="false">Click here to get your coupon</a></span>
                         </div>
                         <div class="panel-collapse collapse coupon_form " id="coupon">
                             <div class="panel-body">
-                                <p class="mb-30 font-sm">If you have a coupon code, please apply it below.</p>
-                                <form method="post">
-                                    <div class="form-group">
-                                        <input type="text" placeholder="Enter Coupon Code...">
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="btn  btn-md" name="login">Apply Coupon</button>
-                                    </div>
-                                </form>
+                                <% if (coupons.length>0) { %>
+
+                                    <% coupons.forEach(coupon=> { %>
+                                        <div class="mb-5">
+                                            <%= coupon.name %>:<%= coupon.code %>
+                                        </div>
+                                        <% }) %>
+                                            <% } else { %>
+                                                No coupons Available
+                                                <% } %>
                             </div>
                         </div>
                     </div>
-                </div> -->
+                </div>
                 <div class="row">
                     <div class="col-12">
-                        <div class="divider mt-50 mb-50"></div>
+                        <div class="divider mt-50 mb-50">
+
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -82,12 +87,13 @@
                                         <% cart.items.forEach(item=> { %>
                                             <tr>
                                                 <td class="image product-thumbnail"><img
-                                                        src="/uploads/<%= item.product.images[0].data %>" alt="#"></td>
+                                                        src="/uploads/<%= item.product.images[0].data %>" alt="#">
+                                                </td>
                                                 <td>
                                                     <h5><a href="shop-product-full.html">
                                                             <%= item.product.name %>
                                                         </a></h5> <span class="product-qty">x <%= item.quantity %>
-                                                            </span>
+                                                    </span>
                                                 </td>
                                                 <td>
                                                     <%= item.subTotal%>
@@ -97,7 +103,7 @@
                                             <% }) %>
                                                 <tr>
                                                     <th>SubTotal</th>
-                                                    <td class="product-subtotal" colspan="2">
+                                                    <td class="product-subtotal" id="total_amount" colspan="2">
                                                         <%= cart.allTotal %>
                                                     </td>
                                                 </tr>
@@ -108,12 +114,22 @@
                                                 <tr>
                                                     <th>Total</th>
                                                     <td colspan="2" class="product-subtotal"><span
-                                                            class="font-xl text-brand fw-900">
+                                                            class="font-xl text-brand fw-900" id="allTotal">
                                                             <%= cart.allTotal %>
                                                         </span></td>
                                                 </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="form-row row justify-content-center">
+                                <div class="form-group col-lg-6">
+                                    <input class="font-medium" name="Coupon" placeholder="Enter Your Coupon"
+                                        id="coupon_input">
+                                </div>
+                                <div class="form-group col-lg-6">
+                                    <button class="btn  btn-sm" onclick="applyCode()"><i
+                                            class="fi-rs-label mr-10"></i>Apply</button>
+                                </div>
                             </div>
                             <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                             <div class="payment_method">
@@ -128,7 +144,8 @@
                                             data-target="#bankTranfer" aria-controls="bankTranfer">Direct Bank
                                             Transfer</label>
                                         <div class="form-group collapse in" id="bankTranfer">
-                                            <p class="text-muted mt-5">There are many variations of passages of Lorem
+                                            <p class="text-muted mt-5">There are many variations of passages of
+                                                Lorem
                                                 Ipsum available, but the majority have suffered alteration. </p>
                                         </div>
                                     </div>
@@ -149,7 +166,8 @@
                                         <label class="form-check-label" for="exampleRadios5" data-bs-toggle="collapse"
                                             data-target="#paypal" aria-controls="paypal">Paypal</label>
                                         <div class="form-group collapse in" id="paypal">
-                                            <p class="text-muted mt-5">Pay via PayPal; you can pay with your credit card
+                                            <p class="text-muted mt-5">Pay via PayPal; you can pay with your credit
+                                                card
                                                 if you don't have a PayPal account.</p>
                                         </div>
                                     </div>
@@ -172,7 +190,7 @@
                 let data = {
                     address: address,
                     payment: payment,
-                    price:price
+                    price: price
                 }
                 $.ajax({
                     url: "/place-order",
@@ -197,5 +215,33 @@
                 });
             });
         });
+
+        function applyCode() {
+            const data = { code: $("#coupon_input").val() }
+            const oldSubtotal = $('#total_amount').html();
+            const oldTotal = $('#allTotal').html();
+            $.ajax({
+                url: '/apply-coupon',
+                method: "POST",
+                data: data,
+                success: (res) => {
+                    Toastify({
+                        text: res.message,
+                        duration: 3000, // Customize duration as needed
+                        gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                        position: "center", // Align toast (center, left, right)
+                        stopOnFocus: true,
+                        style: {
+                            background: "red", // Green background
+                        },
+                    }).showToast();
+                    if (res.status) {
+                        $('#total_amount').html(`<del>${oldSubtotal}</del> &nbsp;&nbsp; ${res.allTotal}`);
+                        $('#allTotal').html(`<del>${oldTotal}</del> &nbsp;&nbsp; ${res.allTotal}`);
+
+                    }
+                }
+            })
+        }
     </script>
     <%- include("../layout/footer.ejs") %>

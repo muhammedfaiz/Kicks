@@ -1,0 +1,112 @@
+<%- include("../layout/headerBack.ejs") %>
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Coupon List</h2>
+                <p>All coupons.</p>
+            </div>
+
+        </div>
+        <div class="card mb-4">
+            <header class="card-header">
+            </header> <!-- card-header end// -->
+            <div class="card-body">
+                <% if(coupons !=='undefined' && coupons.length> 0){%>
+                    <%coupons.forEach(function (coupon){%>
+                        <article class="itemlist">
+                            <div class="row align-items-center">
+                                <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
+                                    <a class="itemside" href="#">
+                                        <div class="info">
+                                            <h6 class="mb-0">
+                                                <%= coupon.name%>
+                                            </h6>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
+                                    <a class="itemside" href="#">
+                                        <div class="info">
+                                            <h6 class="mb-0">
+                                                <%= coupon.code%>
+                                            </h6>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
+                                    <a class="itemside" href="#">
+                                        <div class="info">
+                                            <h6 class="mb-0">
+                                                Discount: <%= coupon.discount%>%
+                                            </h6>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
+                                    <a class="itemside" href="#">
+                                        <div class="info">
+                                            <p class="mb-0">
+                                                Expiry:<%= coupon.expiry%>
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                                <% if (coupon.status===true) { %>
+                                    <div class="col-lg-2 col-sm-2 col-2 col-status d-flex justify-content-center">
+                                        <span id="statusButton_<%= coupon._id %>"
+                                            class="btn btn-sm rounded-pill alert-success"
+                                            onclick="toggleCouponStatus('<%= coupon._id %>')">Active</span>
+                                    </div>
+                                    <% } else { %>
+                                        <div class="col-lg-2 col-sm-2 col-2 col-status d-flex justify-content-center">
+                                            <span id="statusButton_<%= coupon._id %>"
+                                                class="btn btn-sm rounded-pill alert-danger"
+                                                onclick="toggleCouponStatus('<%= coupon._id %>')">Disabled</span>
+                                        </div>
+                                        <% } %>
+
+                                            <div
+                                                class="col-lg-2 col-sm-4 col-6 col-action d-flex justify-content-evenly">
+                                                <a href="/admin/coupon-edit/<%= coupon._id%>"
+                                                    class="btn btn-sm font-sm rounded btn-brand d-flex justify-content-center align-items-center">
+                                                    <i class="material-icons md-edit"></i> Edit
+                                                </a>
+                                            </div>
+                            </div> <!-- row .// -->
+                        </article> <!-- itemlist  .// -->
+                        <%})%>
+                            <% } else { %>
+                                <div class="row">
+                                    <h4 class="text-dark">No Coupons Added</h4>
+                                </div>
+                                <%}%>
+            </div> <!-- card-body end// -->
+        </div> <!-- card end// -->
+        <div class="pagination-area mt-30 mb-50">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-start">
+                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                    <li class="page-item"><a class="page-link" href="#">02</a></li>
+                    <li class="page-item"><a class="page-link" href="#">03</a></li>
+                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                    <li class="page-item"><a class="page-link" href="#">16</a></li>
+                    <li class="page-item"><a class="page-link" href="#"><i
+                                class="material-icons md-chevron_right"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+    <script>
+        function toggleCouponStatus(id) {
+            $.ajax({
+                url: `/admin/coupon-status/${id}`,
+                method: "PATCH",
+                success: function (res) {
+                    if (res.status) {
+                        location.reload();
+                    }
+                }
+            })
+        }
+    </script>
+    <%- include("../layout/footerBack.ejs") %>

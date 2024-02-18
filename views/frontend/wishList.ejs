@@ -1,0 +1,126 @@
+<%- include('../layout/header.ejs') %>
+
+    <main class="main">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="index.html" rel="nofollow">Home</a>
+                    <span></span> Shop
+                    <span></span> Wishlist
+                </div>
+            </div>
+        </div>
+        <section class="mt-50 mb-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <% if (wishlist!==undefined && wishlist.items.length>0) { %>
+                                <table class="table shopping-summery text-center">
+                                    <thead>
+                                        <tr class="main-heading">
+                                            <th scope="col" colspan="2">Product</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Stock Status</th>
+                                            <th scope="col">Action</th>
+                                            <th scope="col">Remove</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% wishlist.items.forEach(item=> { %>
+                                            <tr>
+                                                <td class="image product-thumbnail"><img
+                                                        src="/uploads/<%= item.product.images[0].data %>" alt="#"></td>
+                                                <td class="product-des product-name">
+                                                    <h5 class="product-name"><a href="">
+                                                            <%= item.product.name %>
+                                                        </a></h5>
+                                                    <p class="font-xs">
+                                                        <%= item.product.description %>
+                                                    </p>
+                                                </td>
+                                                <td class="price" data-title="Price"><span>
+                                                        <%= item.price %>
+                                                    </span></td>
+                                                <% if (item.quantity!==0) { %>
+                                                    <td class="text-center" data-title="Stock">
+                                                        <span class="color3 font-weight-bold">
+                                                            In Stock
+                                                        </span>
+                                                    </td>
+                                                    <% } else { %>
+                                                        <td class="text-center" data-title="Stock">
+                                                            <span class="color3 font-weight-bold text-danger">Out of
+                                                                Stock</span>
+                                                        </td>
+                                                        <% } %>
+                                                            <% if (item.inCart===true) { %>
+                                                                <td class="text-right" data-title="Cart">
+                                                                    <a href="/cart" class="btn btn-sm"><i
+                                                                            class="fi-rs-shopping-bag mr-5"></i>View
+                                                                        in
+                                                                        cart</a>
+                                                                </td>
+                                                                <% } else { %>
+                                                                    <td class="text-right" data-title="Cart">
+                                                                        <a href="/product-view/<%= item.product._id%>" class="btn btn-sm"><i
+                                                                                class="fi-rs-shopping-bag mr-5"></i>Add
+                                                                            to
+                                                                            cart</a>
+                                                                    </td>
+                                                                    <% } %>
+                                                                        <td class="action" data-title="Remove"><a
+                                                                                onclick="removeWishList('<%= item.product._id%>')"><i
+                                                                                    class="fi-rs-trash"></i></a></td>
+                                            </tr>
+                                            <% }) %>
+
+                                    </tbody>
+                                </table>
+                                <% } else { %>
+                                    <h3 class="text-center text-dark">No Items in your wishlist</h3>
+                                    <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function removeWishList(prodId) {
+            $.ajax({
+                url: '/removeWishList/' + prodId,
+                method: "PATCH",
+                success: (response) => {
+                    if (response.status) {
+                        Toastify({
+                            text: "Product removed from wishlist successfully!",
+                            duration: 3000, // Customize duration as needed
+                            gravity: "bottom", // Choose placement (top, top-left, top-right, bottom, etc.)
+                            position: "center", // Align toast (center, left, right)
+                            style: {
+                                background: "green",
+                            } // Green background
+                        }).showToast();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
+                    } else {
+                        Toastify({
+                            text: "Failed to add product to wishlist. Please try again.",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "center",
+                            style: {
+                                background: "#f44336", // Red background
+                                color: "#fff"
+                            }
+                        }).showToast();
+                    }
+                }
+            })
+        }
+    </script>
+
+    <%- include('../layout/footer.ejs') %>

@@ -1,51 +1,116 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const adminController = require('../controller/adminController');
-const middleware = require('../middlewares/adminMiddleware');
+const adminController = require("../controller/admin/adminController");
+const adminAuthConroller = require("../controller/admin/authController");
+const productController = require("../controller/admin/productController");
+const categoryController = require("../controller/admin/categoryController");
+const userController = require("../controller/admin/userController");
+const orderController = require("../controller/admin/orderController");
+const couponController = require("../controller/admin/couponController");
+const offerController = require("../controller/admin/offerController");
+const middleware = require("../middlewares/adminMiddleware");
 
+router.get("/", middleware.notLogin, adminAuthConroller.loginLoad);
 
-router.get('/',middleware.notLogin,adminController.loginLoad);
+router.post("/", adminAuthConroller.loginSubmit);
 
-router.post('/',adminController.loginSubmit);
+router.get("/dashboard", middleware.isLogin, adminController.dashboardLoad);
 
-router.get('/dashboard',middleware.isLogin,adminController.dashboardLoad);
+router.get("/logout", adminAuthConroller.adminLogout);
 
-router.get('/logout',adminController.adminLogout);
+router.get("/product-list", middleware.isLogin, productController.productList);
 
-router.get('/product-list',middleware.isLogin,adminController.productList);
+router.get(
+  "/product-add",
+  middleware.isLogin,
+  productController.productAddLoad
+);
 
-router.get('/product-add',middleware.isLogin,adminController.productAddLoad);
+router.post(
+  "/product-add",
+  middleware.upload.array("images"),
+  productController.productAdd
+);
 
-router.post('/product-add',middleware.upload.array("images"),adminController.productAdd);
+router.patch("/product-status/:id", productController.productStatusHandle);
 
-router.patch('/product-status/:id',adminController.productStatusHandle);
+router.get(
+  "/product-edit/:id",
+  middleware.isLogin,
+  productController.productEditHandler
+);
 
-router.get('/product-edit/:id',middleware.isLogin,adminController.productEditHandler);
+router.put(
+  "/product-edit/:id",
+  middleware.upload.array("images"),
+  productController.productEdit
+);
 
-router.put('/product-edit/:id',middleware.upload.array('images'),adminController.productEdit);
+router.delete("/product-delete/:id", productController.productDeletion);
 
-router.delete('/product-delete/:id',adminController.productDeletion);
+router.get(
+  "/category-list",
+  middleware.isLogin,
+  categoryController.categoryList
+);
 
-router.get('/category-list',middleware.isLogin,adminController.categoryList);
+router.get(
+  "/category-add",
+  middleware.isLogin,
+  categoryController.categoryAddLoad
+);
 
-router.get('/category-add',middleware.isLogin,adminController.categoryAddLoad);
+router.post("/category-add", categoryController.categoryAdd);
 
-router.post('/category-add',adminController.categoryAdd);
+router.get(
+  "/category-edit/:id",
+  middleware.isLogin,
+  categoryController.categoryEditLoad
+);
 
-router.get('/category-edit/:id',middleware.isLogin,adminController.categoryEditLoad);
+router.put("/category-edit/:id", categoryController.categoryEdit);
 
-router.put('/category-edit/:id',adminController.categoryEdit);  
+router.patch("/category-remove/:id", categoryController.categoryRemove);
 
-router.patch('/category-remove/:id',adminController.categoryRemove);
+router.get("/user-list", middleware.isLogin, userController.userList);
 
-router.get("/user-list",middleware.isLogin,adminController.userList);
+router.patch("/user-status/:id", userController.userStatus);
 
-router.patch('/user-status/:id',adminController.userStatus);
+router.get("/order-list", middleware.isLogin, orderController.orderList);
 
-router.get('/order-list',middleware.isLogin,adminController.orderList);
+router.get(
+  "/order-details/:orderId",
+  middleware.isLogin,
+  orderController.orderDetails
+);
 
-router.get("/order-details/:id",middleware.isLogin,adminController.orderDetails);
+router.patch(
+  "/order-status/:orderId/:itemId",
+  orderController.changeOrderStatus
+);
 
-router.patch("/order-status/:id",adminController.changeOrderStatus);
+router.get("/coupon",middleware.isLogin,couponController.couponList);
+
+router.get("/coupon-add", middleware.isLogin, couponController.couponAddLoad);
+
+router.post("/coupon-add", couponController.couponAdd);
+
+router.get("/coupon-edit/:id",middleware.isLogin,couponController.couponEditLoad);
+
+router.put("/coupon-edit/:id",couponController.couponEdit);
+
+router.patch("/coupon-status/:id",couponController.changeCouponStatus);
+
+router.get("/offer-add",middleware.isLogin,offerController.offerAddLoad);
+
+router.post("/offer-add", offerController.offerAdd);
+
+router.get("/offer-list",middleware.isLogin,offerController.offerList);
+
+router.patch("/offer-status/:id",offerController.offerStatus);
+
+router.get("/offer-edit/:id",middleware.isLogin,offerController.offerEditLoad);
+
+router.put("/offer-edit/:id",offerController.offerEdit);
 
 module.exports = router;

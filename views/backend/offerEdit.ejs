@@ -1,0 +1,104 @@
+<%- include ('../layout/headerBack.ejs') %>
+    <section class="content-main">
+        <div class="row">
+            <div class="col-9">
+                <div class="content-header">
+                    <h2 class="content-title">Add New offer</h2>
+
+                </div>
+                <% if (message!==undefined) { %>
+                    <div class="success text-success mb-4 mx-2" id="success">
+                        <%= message %>
+                    </div>
+                    <% } %>
+                        <div class="error text-danger mb-4 mx-2" id="error">
+                        </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card mb-4">
+
+                    <div class="card-body">
+                        <form method="post" action="/admin/offer-edit/<%= offer._id%>?_method=PUT">
+                            <input type="hidden" name="_method" value="PUT">
+                            <div class="mb-4">
+                                <label for="offer_name" class="form-label">Offer Name</label>
+                                <input type="text" placeholder="Type here" class="form-control" id="offer_name"
+                                    name="name" value="<%= offer.name %>">
+                                <span id="error-name" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="startDate"
+                                    value="<%= offer.initialDate %>">
+                                <span id="error-code" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="endDate"
+                                    value="<%= offer.expiryDate %>">
+                                <span id="error-discount" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label for="product" class="form-label">Product</label>
+                                <select class="form-control" id="product" name="product">
+                                    <option value="" selected disabled hidden>Select Product...</option>
+                                    <% products.forEach(product=> { %>
+                                        <option value="<%= product._id %>">
+                                            <%= product.name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+
+                            </div>
+                            <div class="mb-4">
+                                <label for="product_discount" class="form-label">Product Discount</label>
+                                <input type="text" placeholder="Type here" class="form-control" id="product_discount"
+                                    name="productDiscount" value="<%= offer.productOffer.discount %>">
+                                <span id="error-product" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="" selected disabled hidden>Select category...</option>
+                                    <% categories.forEach(category=> { %>
+                                        <option value="<%= category._id%>">
+                                            <%= category.name %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+
+                            </div>
+                            <div class="mb-4">
+                                <label for="category_discount" class="form-label">Category Discount</label>
+                                <input type="text" placeholder="Type here" class="form-control" id="category_discount"
+                                    name="categoryDiscount" value="<%= offer.categoryOffer.discount %>">
+                                <span id="error-expiry" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="status" id="flexRadioDefault1"
+                                        checked value="true">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Active
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="status" id="flexRadioDefault2"
+                                        value="false">
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Inactive
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <button type="submit" class="btn btn-md rounded font-sm hover-up">Publish</button>
+                            </div>
+                        </form>
+                    </div>
+                </div> <!-- card end// -->
+
+            </div>
+
+        </div>
+    </section>
+    <%- include ('../layout/footerBack.ejs') %>

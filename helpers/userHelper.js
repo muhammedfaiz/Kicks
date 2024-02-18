@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 const loginHelper = (userData) => {
   return new Promise(async (resolve, reject) => {
@@ -62,19 +63,19 @@ const getUserHelper = (id) => {
 };
 
 const addAddressHelper = (id, data) => {
-  return new Promise(async (resolve, reject) => {    
+  return new Promise(async (resolve, reject) => {
     const user = await User.updateOne(
       { _id: id },
       {
         $push: {
           address: {
-            name:data.name,
-            house:data.house,
-            city:data.city,
-            state:data.state,
-            country:data.country,
-            pincode:data.pincode,
-            type:data.type
+            name: data.name,
+            house: data.house,
+            city: data.city,
+            state: data.state,
+            country: data.country,
+            pincode: data.pincode,
+            type: data.type,
           },
         },
       }
@@ -85,49 +86,112 @@ const addAddressHelper = (id, data) => {
   });
 };
 
-const deleteAddressHelper=(userId,addressId)=>{
-    return new Promise (async(resolve,reject)=>{
-        try {
-            const result = await User.updateOne({_id:userId},{$pull:{
-                address:{_id:addressId}
-            }});
-            if(result){
-                resolve(result);
-            }
-        } catch (error) {
-            console.log(error);
+const deleteAddressHelper = (userId, addressId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await User.updateOne(
+        { _id: userId },
+        {
+          $pull: {
+            address: { _id: addressId },
+          },
         }
-    });
-}
+      );
+      if (result) {
+        resolve(result);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
 
-const editUserDetailsHelper=(userId,data)=>{
-    return new Promise(async(resolve,reject)=>{
-        try {
-            const user = await User.findById(userId);
-            const password = bcrypt.compareSync(data.password,user.password);
-            if(password){ 
-                let userData={};
-                if(data.name){
-                    userData.name=data.name;
-                }
-                if(data.email){
-                    userData.email=data.email;
-                }
-                if(data.mobile){
-                    userData.mobile=data.mobile;
-                }
-                if(data.npassword && data.npassword===data.cpassword){
-                    userData.password=bcrypt.hashSync(data.npassword,10);
-                }
-                const updataUser =  await User.updateOne({_id : userId },{ $set: userData });
-                resolve(updataUser); 
-            }else{
-                resolve("password is incorrect");
-            }
-        } catch (error) {
-            console.log(error);
+const editUserDetailsHelper = (userId, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const user = await User.findById(userId);
+      const password = bcrypt.compareSync(data.password, user.password);
+      if (password) {
+        let userData = {};
+        if (data.name) {
+          userData.name = data.name;
         }
-    });
-}
+        if (data.email) {
+          userData.email = data.email;
+        }
+        if (data.mobile) {
+          userData.mobile = data.mobile;
+        }
+        if (data.npassword && data.npassword === data.cpassword) {
+          userData.password = bcrypt.hashSync(data.npassword, 10);
+        }
+        const updataUser = await User.updateOne(
+          { _id: userId },
+          { $set: userData }
+        );
+        resolve(updataUser);
+      } else {
+        resolve("password is incorrect");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
 
-module.exports = { loginHelper, signupHelper, getUserHelper, addAddressHelper ,deleteAddressHelper,editUserDetailsHelper};
+const editAddressLoadHelper = (addressId, userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const address = await User.aggregate([
+        { $unwind: "$address" },
+        {
+          $match: {
+            _id: new ObjectId(userId),
+            "address._id": new ObjectId(addressId),
+          },
+        },
+        { $project: { address: 1, _id: 0 } },
+      ]);
+      resolve(address);
+    } catch (error) {
+      cosnole.log(error);
+    }
+  });
+};
+
+const editAddressHelper = (addressId, userId, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updateAddress = await User.updateOne(
+        { _id: new ObjectId(userId), "address._id": new ObjectId(addressId) },
+        {
+          $set: {
+            "address.$": {
+              name: data.name,
+              house: data.house,
+              city: data.city,
+              state: data.state,
+              country: data.country,
+              pincode: data.pincode,
+              type: data.type,
+            },
+          },
+        }
+      );
+      resolve(updateAddress);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+module.exports = {
+  loginHelper,
+  signupHelper,
+  getUserHelper,
+  addAddressHelper,
+  deleteAddressHelper,
+  editUserDetailsHelper,
+  editAddressLoadHelper,
+  editAddressHelper,
+};

@@ -32,7 +32,7 @@ const productAddHelper = (data, files) => {
             quantity: Number(data.largeQuantity),
           },
         ],
-        category: new mongoose.Types.ObjectId(data.category),
+        category: new ObjectId(data.category),
         images: productImage,
       });
       resolve("New product added successfully");
@@ -101,7 +101,7 @@ const productListHelper = () => {
   });
 };
 
-const activeProductList = () => {
+const activeProductList = (search) => {
   return new Promise(async (resolve, reject) => {
     const products = await Product.aggregate([
       {
@@ -112,7 +112,21 @@ const activeProductList = () => {
           foreignField: "_id",
         },
       },
-      { $match: { status: true, "category.list": true } },
+      {$unwind:"$category"},
+      {
+        $match: {
+          $and: [
+            { status: true },
+            { "category.list": true },
+            {
+              $or: [
+                { name: { $regex: new RegExp(search, "i") } },
+                { "category.name": { $regex: new RegExp(search, "i") } },
+              ],
+            },
+          ],
+        },
+      },
     ]);
     if (products) {
       resolve(products);
@@ -147,90 +161,88 @@ const productEditHelper = (id, data, files) => {
         });
       }
       const exist = await Product.findOne({ name: data.name });
-      const existId = ""+exist._id
-    if (!exist) {
-      let updateProduct = {
-        stock: [],
-      };
-      if (data.name) {
-        updateProduct.name = data.name;
-      }
-      if (data.brandName) {
-        updateProduct.brandName = data.brandName;
-      }
-      if (data.description) {
-        updateProduct.description = data.description;
-      }
-      if (data.price) {
-        updateProduct.price = data.price;
-      }
-      if (data.discount) {
-        updateProduct.offerPrice = data.discount;
-      }
-      if (data.smallQuantity) {
-        updateProduct.stock.push({ size: "S", quantity: data.smallQuantity });
-      }
-      if (data.mediumQuantity) {
-        updateProduct.stock.push({
-          size: "M",
-          quantity: data.mediumQuantity,
-        });
-      }
-      if (data.largeQuantity) {
-        updateProduct.stock.push({ size: "L", quantity: data.largeQuantity });
-      }
-      if (productImage.length >= 4) {
-        updateProduct.images = productImage;
-      }
-      const updatedProduct = await Product.updateOne(
-        { _id: id },
-        { $set: updateProduct }
-      );
-      resolve("Product Edited");
-    
-
-    } else if(exist && existId == id) {
-      let updateProduct = {
-        stock: [],
-      };
-      if (data.name) {
-        updateProduct.name = data.name;
-      }
-      if (data.brandName) {
-        updateProduct.brandName = data.brandName;
-      }
-      if (data.description) {
-        updateProduct.description = data.description;
-      }
-      if (data.price) {
-        updateProduct.price = data.price;
-      }
-      if (data.discount) {
-        updateProduct.offerPrice = data.discount;
-      }
-      if (data.smallQuantity) {
-        updateProduct.stock.push({ size: "S", quantity: data.smallQuantity });
-      }
-      if (data.mediumQuantity) {
-        updateProduct.stock.push({
-          size: "M",
-          quantity: data.mediumQuantity,
-        });
-      }
-      if (data.largeQuantity) {
-        updateProduct.stock.push({ size: "L", quantity: data.largeQuantity });
-      }
-      if (productImage.length >= 4) {
-        updateProduct.images = productImage;
-      }
-      const updatedProduct = await Product.updateOne(
-        { _id: id },
-        { $set: updateProduct }
-      );
-      resolve("Product Edited");
-    }else{
+      const existId = "" + exist._id;
+      if (!exist) {
+        let updateProduct = {
+          stock: [],
+        };
+        if (data.name) {
+          updateProduct.name = data.name;
+        }
+        if (data.brandName) {
+          updateProduct.brandName = data.brandName;
+        }
+        if (data.description) {
+          updateProduct.description = data.description;
+        }
+        if (data.price) {
+          updateProduct.price = data.price;
+        }
+        if (data.discount) {
+          updateProduct.offerPrice = data.discount;
+        }
+        if (data.smallQuantity) {
+          updateProduct.stock.push({ size: "S", quantity: data.smallQuantity });
+        }
+        if (data.mediumQuantity) {
+          updateProduct.stock.push({
+            size: "M",
+            quantity: data.mediumQuantity,
+          });
+        }
+        if (data.largeQuantity) {
+          updateProduct.stock.push({ size: "L", quantity: data.largeQuantity });
+        }
+        if (productImage.length >= 4) {
+          updateProduct.images = productImage;
+        }
+        const updatedProduct = await Product.updateOne(
+          { _id: id },
+          { $set: updateProduct }
+        );
+        resolve("Product Edited");
+      } else if (exist && existId == id) {
+        let updateProduct = {
+          stock: [],
+        };
+        if (data.name) {
+          updateProduct.name = data.name;
+        }
+        if (data.brandName) {
+          updateProduct.brandName = data.brandName;
+        }
+        if (data.description) {
+          updateProduct.description = data.description;
+        }
+        if (data.price) {
+          updateProduct.price = data.price;
+        }
+        if (data.discount) {
+          updateProduct.offerPrice = data.discount;
+        }
+        if (data.smallQuantity) {
+          updateProduct.stock.push({ size: "S", quantity: data.smallQuantity });
+        }
+        if (data.mediumQuantity) {
+          updateProduct.stock.push({
+            size: "M",
+            quantity: data.mediumQuantity,
+          });
+        }
+        if (data.largeQuantity) {
+          updateProduct.stock.push({ size: "L", quantity: data.largeQuantity });
+        }
+        if (productImage.length >= 4) {
+          updateProduct.images = productImage;
+        }
+        const updatedProduct = await Product.updateOne(
+          { _id: id },
+          { $set: updateProduct }
+        );
+        resolve("Product Edited");
+      } else {
         resolve("Product already exists");
-    }
+      }
     } catch (error) {
       reject(error);
     }
@@ -270,6 +282,67 @@ const currencyFormatter = (amount) => {
   });
 };
 
+const parseCurrencyString = (formattedString) => {
+  // Remove non-numeric characters and convert to a number
+  return Number(formattedString.replace(/[^0-9.-]+/g, ""));
+};
+
+const shopViewHeleper = (category) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (category) {
+        const products = await Product.aggregate([
+          {
+            $lookup: {
+              from: "categories",
+              as: "category",
+              localField: "category",
+              foreignField: "_id",
+            },
+          },
+          {
+            $unwind: "$category",
+          },
+          {
+            $match: {
+              $and: [
+                { status: true },
+                { "category.list": true },
+                { "category._id": new ObjectId(category) },
+              ],
+            },
+          },
+        ]);
+        resolve(products);
+      }  else {
+        const products = await Product.aggregate([
+          {
+            $lookup: {
+              from: "categories",
+              as: "category",
+              localField: "category",
+              foreignField: "_id",
+            },
+          },
+          {
+            $unwind: "$category",
+          },
+          {
+            $match: {
+              $and: [{ status: true }, { "category.list": true }],
+            },
+          },
+        ]);
+        resolve(products);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+
+
 module.exports = {
   productAddHelper,
   productCategoryList,
@@ -280,4 +353,7 @@ module.exports = {
   selectedProduct,
   activeProductList,
   currencyFormatter,
+  parseCurrencyString,
+  shopViewHeleper,
+  
 };

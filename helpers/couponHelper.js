@@ -1,5 +1,6 @@
 const Coupon = require("../models/couponModel");
 const Cart = require("../models/cartModel");
+const productHelper = require("../helpers/productHelper");
 const couponAddHelper = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -7,7 +8,10 @@ const couponAddHelper = (data) => {
       const addCoupon = await Coupon.create({
         name: data.name,
         code: data.code,
+        description:data.description,
         discount: data.discount,
+        minAmount:data.minAmount,
+        maxAmount:data.maxAmount,
         expiration: formattedDate,
         status: data.status,
       });
@@ -48,6 +52,8 @@ const couponEditHelper = (id, data) => {
         name: data.name,
         code: data.code,
         discount: data.discount,
+        minAmount:data.minAmount,
+        maxAmount:data.maxAmount,
         expiration: formattedDate,
         status: data.status,
       };
@@ -80,15 +86,20 @@ const applyCouponHelper = (data, userId) => {
         if (!coupon.usedBy.includes(userId)) {
           let cart = await Cart.findOne({ user: userId });
           const discount = coupon.discount;
-          cart.total = cart.total - (cart.total * discount) / 100;
-          cart.coupon = data.code;
-          await cart.save();
-          resolve({
-            discount: discount,
-            cart: cart,
-            status: true,
-            message: "Coupon Applied",
-          });
+          if(cart.total>=coupon.minAmount && cart.total<=coupon.maxAmount){
+
+            cart.total = cart.total - (cart.total * discount) / 100;
+            cart.coupon = data.code;
+            await cart.save();
+            resolve({
+              discount: discount,
+              cart: cart,
+              status: true,
+              message: "Coupon Applied",
+            });
+          }else{
+            resolve({message:"coupon cannot be added unless the purchase amount is upto limit",status:false});
+          }
         } else {
           resolve({ message: "Coupon Already used", status: false });
         }
@@ -105,15 +116,34 @@ const getUserCoupons = async (user) => {
   return new Promise(async (resolve, reject) => {
     try {
       const coupons = await Coupon.find();
-      const data=[];
-      for(let coupon of coupons){
-        if ( coupon.status) {
+      const data = [];
+      for (let coupon of coupons) {
+        if (coupon.status) {
           if (!coupon.usedBy.includes(user)) {
             data.push(coupon);
           }
         }
       }
       resolve(data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const removeCouponHelper = (data, userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const coupon = await Coupon.findOne({ code: data.code });
+      const oldTotal = await productHelper.parseCurrencyString(data.oldTotal);
+      if (coupon && coupon.status) {
+        const cart = await Cart.findOne({ user: userId });
+        const discount = coupon.discount;
+        cart.total = cart.total + (oldTotal * discount) / 100;
+        cart.coupon=null;
+        await cart.save();
+        resolve({cart:cart,message:"Coupon removed Successfully"});
+      }
     } catch (error) {
       console.log(error);
     }
@@ -128,4 +158,5 @@ module.exports = {
   toggleStatus,
   applyCouponHelper,
   getUserCoupons,
+  removeCouponHelper,
 };

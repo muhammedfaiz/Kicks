@@ -1,16 +1,56 @@
 const cartHelper = require("../../helpers/cartHelper");
 const productHelper = require("../../helpers/productHelper");
+const offerHelper = require('../../helpers/offerHelper');
 
 // get all products form the cart
 const getAllCart = async (req, res) => {
   try {
     const result = await cartHelper.getAllItems(req.session.userId);
     if (result !== false) {
+      const currentDate = new Date();
+      const offer = await offerHelper.getActiveOffer(currentDate);
+      let offerPrice;
       for (let i = 0; i < result.items.length; i++) {
-        const offerPrice =
-          result.items[i].product.price -
-          (result.items[i].product.price * result.items[i].product.discount) /
-            100;
+        const productOffer = offer.find((item) =>
+          item.productOffer.product._id.equals(result.items[i].product._id)
+        );
+        const categoryOffer = offer.find((item) =>
+          item.categoryOffer.category._id.equals(result.items[i].product.category)
+        );
+        if (productOffer && categoryOffer) {
+          if (
+            productOffer.productOffer.discount >
+            categoryOffer.categoryOffer.discount
+          ) {
+            offerPrice =
+              result.items[i].product.price -
+              (result.items[i].product.price *
+                productOffer.productOffer.discount) /
+                100;
+          } else {
+            offerPrice =
+              result.items[i].product.price -
+              (result.items[i].product.price *
+                categoryOffer.categoryOffer.discount) /
+                100;
+          }
+        } else if (productOffer) {
+          offerPrice =
+            result.items[i].product.price -
+            (result.items[i].product.price * productOffer.productOffer.discount) /
+              100;
+        } else if (categoryOffer) {
+          offerPrice =
+            result.items[i].product.price -
+            (result.items[i].product.price *
+              categoryOffer.categoryOffer.discount) /
+              100;
+        } else {
+          offerPrice =
+            result.items[i].product.price -
+            (result.items[i].product.price * result.items[i].product.discount) /
+              100;
+        }
         let total = result.items[i].quantity * offerPrice;
         result.items[i].subTotal = productHelper.currencyFormatter(
           Math.round(total)
@@ -48,7 +88,7 @@ const updateQuantity = async (req, res) => {
     );
     if (update !== "Out of stock") {
       const cart = await cartHelper.getCartItem(id, req.session.userId);
-      const offerPrice = Math.round(cart.items.product[0].price - (cart.items.product[0].price*cart.items.product[0].discount)/100);
+      const offerPrice = Math.round(cart.items.product[0].price - (cart.items.product[0].price*cart.items.discount)/100);
       cart.items.offerPrice =productHelper.currencyFormatter(offerPrice);
       cart.items.totalPrice = productHelper.currencyFormatter(cart.items.quantity * offerPrice);
       cart.allTotal = productHelper.currencyFormatter(Math.round(cart.total));      

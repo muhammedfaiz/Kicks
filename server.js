@@ -1,39 +1,22 @@
 const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
+const config = require('./config');
 const session = require("express-session");
 const path = require("path");
 const user = require("./routes/users");
 const admin = require('./routes/admin');
-const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 require('dotenv').config();
 
-// mongoose connection establishment
-const uri = process.env.URI;
-mongoose.connect(uri);
-
-const db = mongoose.connection;
-
-db.on("connected", () => {
-  console.log("connected to Mongodb");
-});
-
-db.on("error", (err) => {
-  console.error("Error connecting to MongoDB:", err);
-});
-
-db.on("disconnected", () => {
-  console.log("Disconnected from MongoDB");
-});
+config.mongooseSetup();
 
 // setting view engine
 app.set("view engine", "ejs");
 // setting public
 app.use(express.static(path.join(__dirname, "public")));
 // parsing body
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 // Setting up session
 app.use(session({ secret: "mine", resave: false, saveUninitialized: false,cookie:{
     maxAge:60*60*1000,secure:false,httpOnly:true

@@ -3,6 +3,7 @@ const cartHelper = require("../../helpers/cartHelper");
 const productHelper = require("../../helpers/productHelper");
 const userHelper = require("../../helpers/userHelper");
 const couponHelper = require("../../helpers/couponHelper");
+const path = require("path");
 
 // checkout load from cart
 const checkoutCart = async (req, res) => {
@@ -31,7 +32,7 @@ const checkoutCart = async (req, res) => {
         cart: result,
         user: user,
         userDetails: userDetails,
-        coupons:coupons
+        coupons: coupons,
       });
     }
   } catch (error) {
@@ -41,15 +42,23 @@ const checkoutCart = async (req, res) => {
 // place order
 const placeOrder = async (req, res) => {
   try {
-    const result = await orderHelper.placeOrderHelper(
-      req.body,
-      req.session.userId
-    );
-    if (result) {
-      const cart = await cartHelper.emptyCart(req.session.userId);
-      if (cart) {
-        res.json({ url: "/order-placed" });
+    if (req.body.payment == "COD") {
+      const result = await orderHelper.placeOrderHelper(
+        req.body,
+        req.session.userId,
+        "Pending"
+      );
+      if (result) {
+        const cart = await cartHelper.emptyCart(req.session.userId);
+        if (cart) {
+          res.json({ success: true });
+        }
       }
+    } else if (req.body.payment == "razorpay") {
+      const cart = await cartHelper.getUserCart(req.session.userId);
+      const data = await orderHelper.generateRazorpay(cart);
+      const user = await userHelper.getUserHelper(req.session.userId);
+      res.json({ data: data, user: user });
     }
   } catch (error) {
     console.log(error);
@@ -71,7 +80,13 @@ const getOrderDetails = async (req, res) => {
     const orderId = req.params.id;
     const userId = req.session.userId;
     const orders = await orderHelper.orderDetailsUserHelper(orderId, userId);
-    orders.orderTotal = productHelper.currencyFormatter(Math.round(orders.total));
+    orders.orderTotal = productHelper.currencyFormatter(
+      Math.round(orders.total)
+    );
+    for (const item of orders.items) {
+      item.offerPrice = productHelper.currencyFormatter(Math.round(item.price));
+    }
+    await orderHelper.generateInvoice(orders);
     if (orders) {
       res.render("frontend/orderDetails", { data: orders, user: userId });
     }
@@ -85,7 +100,11 @@ const orderCancel = async (req, res) => {
   try {
     const orderId = req.params.orderId;
     const itemId = req.params.itemId;
-    const result = await orderHelper.orderCancelHelper(orderId, itemId);
+    const result = await orderHelper.orderCancelHelper(
+      orderId,
+      itemId,
+      req.session.userId
+    );
     if (result) {
       res.json({ status: true });
     }
@@ -107,6 +126,79 @@ const orderReturn = async (req, res) => {
   }
 };
 
+const verifyOnlinePayment = async (req, res) => {
+  try {
+    req.session.data = req.body.data;
+    const verify = await orderHelper.verifyPaymentHelper(req.body);
+    if (verify) {
+      const data = req.session.data;
+      if(data.orderId){
+        const result = await orderHelper.payLaterHelper(data.orderId);
+        if(result){
+          res.json({success:true});
+        }else{
+          res.json({success:false});
+        }
+      }else{
+        const result = await orderHelper.placeOrderHelper(
+          data,
+          req.session.userId,
+          "Pending"
+        );
+        if (result) {
+          const cart = await cartHelper.emptyCart(req.session.userId);
+          if (cart) {
+            res.json({ success: true });
+          }
+        }
+      }
+      delete req.session.data;
+    } else {
+      const data = req.session.data;
+      const result = await orderHelper.placeOrderHelper(
+        data,
+        req.session.userId,
+        "Payment Pending"
+      );
+      if (result) {
+        const cart = await cartHelper.emptyCart(req.session.userId);
+        if (cart) {
+          res.json({ orderId: result._id });
+          delete req.session.data;
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const invoiceGenerator = async (req, res) => {
+  try {
+    const order = await orderHelper.orderDetailsHelper(req.params.id);
+    if (order) {
+      const invoicePath = path.join(
+        __dirname,
+        "../../public/invoice",
+        `invoice-${order.orderId}.pdf`
+      );
+      res.download(invoicePath);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const payLater = async (req, res) => {
+  try {
+    const data = await orderHelper.generateRazorpay({total:req.body.price,user:req.session.userId});
+    const user = await userHelper.getUserHelper(req.session.userId);
+    res.json({ data: data, user: user });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   checkoutCart,
   placeOrder,
@@ -114,4 +206,7 @@ module.exports = {
   orderCancel,
   orderReturn,
   getOrderDetails,
+  verifyOnlinePayment,
+  invoiceGenerator,
+  payLater,
 };

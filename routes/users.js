@@ -33,7 +33,7 @@ router.get(
   productController.productView
 );
 
-router.post("/cart/:id/:size", productController.addToCart);
+router.post("/cart", productController.addToCart);
 
 router.get("/cart", middleware.isLogin, cartController.getAllCart);
 
@@ -61,9 +61,17 @@ router.get("/checkout", middleware.isLogin, orderController.checkoutCart);
 
 router.post("/place-order", orderController.placeOrder);
 
+router.post("/pay-later", orderController.payLater);
+
+router.post("/verify-payment", orderController.verifyOnlinePayment);
+
 router.get("/order-placed", middleware.isLogin, orderController.orderSuccess);
 
-router.get("/order-detail/:id",middleware.isLogin,orderController.getOrderDetails);
+router.get(
+  "/order-detail/:id",
+  middleware.isLogin,
+  orderController.getOrderDetails
+);
 
 router.patch("/order-cancel/:orderId/:itemId", orderController.orderCancel);
 
@@ -77,6 +85,20 @@ router.get("/wish-list", middleware.isLogin, wishListController.wishListView);
 
 router.get("/logout", userAuthController.logoutHandle);
 
-router.post('/apply-coupon',couponController.applyCoupon);
+router.post("/apply-coupon", couponController.applyCoupon);
+
+router.post("/remove-coupon", couponController.removeCoupon);
+
+router.get("/shop", middleware.isLogin, productController.shopView);
+
+router.get("/download-invoice/:id", orderController.invoiceGenerator);
+
+router.get("/forgot-password", userAuthController.forgetPassLoad);
+
+router.post("/forgot-password", userAuthController.forgetPass);
+
+router.get("/reset-password/:id/:token", userAuthController.resetPasswordLoad);
+
+router.post("/reset-password/:id/:token", userAuthController.resetPassword);
 
 module.exports = router;

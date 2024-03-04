@@ -1,23 +1,24 @@
 const userHelper = require("../../helpers/userHelper");
 const productHelper = require("../../helpers/productHelper");
 const orderHelper = require("../../helpers/orderHelper");
+const offerHelper = require("../../helpers/offerHelper");
 const moment = require("moment");
 
 // Home serving
 const homeLoad = async (req, res) => {
   try {
-    const products = await productHelper.activeProductList();
-    for (let i = 0; i < products.length; i++) {
-      const offerPrice =
-        products[i].price - (products[i].price * products[i].discount) / 100;
-      products[i].offerPrice = productHelper.currencyFormatter(
-        Math.round(offerPrice)
-      );
-      products[i].price = productHelper.currencyFormatter(products[i].price);
+    let products;
+    const userId = req.session.userId;
+    if (req.query.search) {
+      products = await productHelper.activeProductList(req.query.search);
+    } else {
+      products = await productHelper.activeProductList();
     }
+    const offerProducts = await offerHelper.offerFind(products);
+
     res.render("frontend/home", {
-      products: products,
-      user: req.session.userId,
+      products: offerProducts,
+      user: userId,
     });
   } catch (error) {
     console.log(error);
@@ -32,18 +33,28 @@ const getUserProfile = async (req, res) => {
     const data = await userHelper.getUserHelper(id);
     const order = await orderHelper.orderUserHelper(req.session.userId);
     for (const item of order) {
-      let quantity=0;
+      let quantity = 0;
       const orderDate = moment(item.orderedOn).format("MMMM Do,YYYY");
       item.orderedDate = orderDate;
       item.allTotal = productHelper.currencyFormatter(Math.round(item.total));
-      for(let i=0;i<item.items.length;i++){
+      for (let i = 0; i < item.items.length; i++) {
         quantity += item.items[i].quantity;
       }
       item.quantity = quantity;
     }
-    if ((data._id = id && order)) {
-      res.render("frontend/profile", { data: data, user: user, orders: order });
+    const wallet = await userHelper.getWallet(user);
+    wallet.balancePrice = productHelper.currencyFormatter(wallet.balance);
+    for (const detail of wallet.details) {
+      detail.formattedDate = moment(detail.date).format("DD-MM-YYYY");
+      detail.formatAmount = productHelper.currencyFormatter(detail.amount);
     }
+
+    res.render("frontend/profile", {
+      data: data,
+      user: user,
+      orders: order,
+      wallet: wallet,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -121,7 +132,7 @@ const editAddress = async (req, res) => {
       userId,
       req.body
     );
-    res.redirect('/user/'+userId);
+    res.redirect("/user/" + userId);
   } catch (error) {
     cosnole.log(error);
   }

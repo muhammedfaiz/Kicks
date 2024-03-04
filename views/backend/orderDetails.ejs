@@ -110,7 +110,7 @@
 
                                             <td>
 
-                                                <select class="form-select " name="status">
+                                                <select class="form-select " id="status-<%= item._id %>">
                                                     <option>Change status</option>
                                                     <option value="Pending">Pending</option>
                                                     <option value="Shipped">Shipped</option>
@@ -176,7 +176,7 @@
 
     <script>
         function changeStatus(oredrId, itemId) {
-            var status = $("select[name='status']").val();
+            var status = $("#status-" + itemId).val();
             console.log(status);
             $.ajax({
                 url: `/admin/order-status/${oredrId}/${itemId}`,

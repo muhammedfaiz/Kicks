@@ -8,6 +8,7 @@ const userController = require("../controller/admin/userController");
 const orderController = require("../controller/admin/orderController");
 const couponController = require("../controller/admin/couponController");
 const offerController = require("../controller/admin/offerController");
+const salesReportController = require("../controller/admin/salesReportController");
 const middleware = require("../middlewares/adminMiddleware");
 
 router.get("/", middleware.notLogin, adminAuthConroller.loginLoad);
@@ -79,6 +80,14 @@ router.patch("/user-status/:id", userController.userStatus);
 router.get("/order-list", middleware.isLogin, orderController.orderList);
 
 router.get(
+  "/order-return",
+  middleware.isLogin,
+  orderController.returnOrdersList
+);
+
+router.patch('/order-returned/:orderId/:itemId',orderController.orderReturned)
+
+router.get(
   "/order-details/:orderId",
   middleware.isLogin,
   orderController.orderDetails
@@ -89,28 +98,44 @@ router.patch(
   orderController.changeOrderStatus
 );
 
-router.get("/coupon",middleware.isLogin,couponController.couponList);
+router.get("/coupon", middleware.isLogin, couponController.couponList);
 
 router.get("/coupon-add", middleware.isLogin, couponController.couponAddLoad);
 
 router.post("/coupon-add", couponController.couponAdd);
 
-router.get("/coupon-edit/:id",middleware.isLogin,couponController.couponEditLoad);
+router.get(
+  "/coupon-edit/:id",
+  middleware.isLogin,
+  couponController.couponEditLoad
+);
 
-router.put("/coupon-edit/:id",couponController.couponEdit);
+router.put("/coupon-edit/:id", couponController.couponEdit);
 
-router.patch("/coupon-status/:id",couponController.changeCouponStatus);
+router.patch("/coupon-status/:id", couponController.changeCouponStatus);
 
-router.get("/offer-add",middleware.isLogin,offerController.offerAddLoad);
+router.get("/offer-add", middleware.isLogin, offerController.offerAddLoad);
 
 router.post("/offer-add", offerController.offerAdd);
 
-router.get("/offer-list",middleware.isLogin,offerController.offerList);
+router.get("/offer-list", middleware.isLogin, offerController.offerList);
 
-router.patch("/offer-status/:id",offerController.offerStatus);
+router.patch("/offer-status/:id", offerController.offerStatus);
 
-router.get("/offer-edit/:id",middleware.isLogin,offerController.offerEditLoad);
+router.get(
+  "/offer-edit/:id",
+  middleware.isLogin,
+  offerController.offerEditLoad
+);
 
-router.put("/offer-edit/:id",offerController.offerEdit);
+router.put("/offer-edit/:id", offerController.offerEdit);
+
+router.get(
+  "/sales-report",
+  middleware.isLogin,
+  salesReportController.generateSalesReport
+);
+
+router.get("/chart-data", salesReportController.getSalesData);
 
 module.exports = router;

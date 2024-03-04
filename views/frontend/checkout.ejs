@@ -25,7 +25,22 @@
 
                                     <% coupons.forEach(coupon=> { %>
                                         <div class="mb-5">
-                                            <%= coupon.name %>:<%= coupon.code %>
+                                            <div class="card m-3">
+                                                <div class="card-header">
+                                                    <h5 class="text-dark">
+                                                        <%= coupon.name %>
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p class="text-dark">
+                                                        code:<%= coupon.code %>
+                                                    </p>
+                                                    <p class="text-dark">
+                                                        description:<%= coupon.description %>
+                                                    </p>
+                                                </div>
+                                            </div>
+
                                         </div>
                                         <% }) %>
                                             <% } else { %>
@@ -127,8 +142,10 @@
                                         id="coupon_input">
                                 </div>
                                 <div class="form-group col-lg-6">
-                                    <button class="btn  btn-sm" onclick="applyCode()"><i
+                                    <button class="btn  btn-sm" id="apply_coupon" onclick="applyCode()"><i
                                             class="fi-rs-label mr-10"></i>Apply</button>
+                                    <button class="btn  btn-sm" id="remove_coupon" onclick="removeCode()"
+                                        style="display: none;"><i class="fi-rs-label mr-10"></i>Remove</button>
                                 </div>
                             </div>
                             <div class="bt-1 border-color-1 mt-30 mb-30"></div>
@@ -162,9 +179,9 @@
                                     </div>
                                     <div class="custome-radio">
                                         <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios5" checked="" value="paypal">
+                                            id="exampleRadios5" checked="" value="razorpay">
                                         <label class="form-check-label" for="exampleRadios5" data-bs-toggle="collapse"
-                                            data-target="#paypal" aria-controls="paypal">Paypal</label>
+                                            data-target="#paypal" aria-controls="paypal">Razor Pay</label>
                                         <div class="form-group collapse in" id="paypal">
                                             <p class="text-muted mt-5">Pay via PayPal; you can pay with your credit
                                                 card
@@ -180,7 +197,6 @@
             </div>
         </section>
     </main>
-
     <script>
         $(document).ready(function () {
             $('#placeOrder').click(function () {
@@ -192,29 +208,104 @@
                     payment: payment,
                     price: price
                 }
-                $.ajax({
-                    url: "/place-order",
-                    method: "POST",
-                    data: data,
-                    success: (res) => {
-                        if (res) {
-                            window.location.href = res.url;
-                        } else {
-                            Toastify({
-                                text: "Something went wrong!!",
-                                duration: 3000, // Customize duration as needed
-                                gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
-                                position: "center", // Align toast (center, left, right)
-                                stopOnFocus: true,
-                                style: {
-                                    background: "red", // Green background
-                                },
-                            }).showToast();
+                if (payment === 'COD' && price > 1000) {
+                    Toastify({
+                        text: "Cash on delivery only for  orders under Rs.1000",
+                        duration: 3000, // Customize duration as needed
+                        gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                        position: "center", // Align toast (center, left, right)
+                        stopOnFocus: true,
+                        style: {
+                            background: "red", // Green background
+                        },
+                    }).showToast();
+                } else {
+                    $.ajax({
+                        url: "/place-order",
+                        method: "POST",
+                        data: data,
+                        success: (res) => {
+                            if (res) {
+                                if (res.success) {
+                                    window.location.href = "/order-placed";
+                                } else {
+                                    razorPay(res.data, res.user);
+                                }
+                            } else {
+                                Toastify({
+                                    text: "Something went wrong!!",
+                                    duration: 3000, // Customize duration as needed
+                                    gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                                    position: "center", // Align toast (center, left, right)
+                                    stopOnFocus: true,
+                                    style: {
+                                        background: "red", // Green background
+                                    },
+                                }).showToast();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
         });
+
+        function razorPay(order, user) {
+            var options = {
+                "key": "rzp_test_FTCuFqtfsLPk6w", // Enter the Key ID generated from the Dashboard
+                "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                "currency": "INR",
+                "name": "Kicks", //your business name
+                "description": "Test Transaction",
+                "image": "../../public/user/imgs/theme/logo.png",
+                "handler": function (response) {
+                    handleSuccess(response, order);
+                },
+                "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
+                    "name": user.name, //your customer's name
+                    "email": user.email,
+                    "contact": user.mobile //Provide the customer's phone number for better conversion rates 
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                },
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open("placeOrder");
+            rzp1.on("payment.failed", function (err) {
+                handleSuccess(err, order);
+            });
+
+        }
+        function handleSuccess(response, order) {
+            let address = $("input[name='address']:checked").val();
+            let payment = $("input[name='payment_option']:checked").val();
+            let price = $("input[name='price']").val();
+            let data = {
+                address: address,
+                payment: payment,
+                price: price
+            }
+            $.ajax({
+                url: "/verify-payment",
+                method: "POST",
+                data: {
+                    payment: response,
+                    order: order,
+                    data: data
+                },
+                success: function (res) {
+                    if (res.success) {
+                        window.location.href = "/order-placed";
+                    } else {
+                        window.location.href = "/order-detail/" + res.orderId;
+                    }
+                }
+            });
+        }
 
         function applyCode() {
             const data = { code: $("#coupon_input").val() }
@@ -225,23 +316,65 @@
                 method: "POST",
                 data: data,
                 success: (res) => {
-                    Toastify({
-                        text: res.message,
-                        duration: 3000, // Customize duration as needed
-                        gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
-                        position: "center", // Align toast (center, left, right)
-                        stopOnFocus: true,
-                        style: {
-                            background: "red", // Green background
-                        },
-                    }).showToast();
                     if (res.status) {
-                        $('#total_amount').html(`<del>${oldSubtotal}</del> &nbsp;&nbsp; ${res.allTotal}`);
-                        $('#allTotal').html(`<del>${oldTotal}</del> &nbsp;&nbsp; ${res.allTotal}`);
+                        Toastify({
+                            text: res.message,
+                            duration: 3000, // Customize duration as needed
+                            gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                            position: "center", // Align toast (center, left, right)
+                            stopOnFocus: true,
+                            style: {
+                                background: "red", // Green background
+                            },
+                        }).showToast();
 
+                        $('#total_amount').html(`<del>${oldSubtotal}</del> &nbsp;&nbsp; ${res.allTotal}`);
+                        $('#allTotal').html(`<del id="total_coupon">${oldTotal}</del> &nbsp;&nbsp; ${res.allTotal}`);
+                        $('#remove_coupon').attr("style", "display:inline");
+                        $("#apply_coupon").attr("style", "display:none");
+                    } else {
+                        Toastify({
+                            text: res.message,
+                            duration: 3000, // Customize duration as needed
+                            gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                            position: "center", // Align toast (center, left, right)
+                            stopOnFocus: true,
+                            style: {
+                                background: "red", // Green background
+                            },
+                        }).showToast();
                     }
                 }
             })
+        }
+        function removeCode() {
+            const oldTotal = $('#total_coupon').text().trim();
+
+            const data = { code: $("#coupon_input").val(), oldTotal: oldTotal }
+            $.ajax({
+                url: '/remove-coupon',
+                method: "POST",
+                data: data,
+                success: (res) => {
+                    if (res) {
+                        Toastify({
+                            text: res.message,
+                            duration: 3000, // Customize duration as needed
+                            gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                            position: "center", // Align toast (center, left, right)
+                            stopOnFocus: true,
+                            style: {
+                                background: "red", // Green background
+                            },
+                        }).showToast();
+                        $('#total_amount').html(`${res.allTotal}`);
+                        $('#allTotal').html(`${res.allTotal}`);
+                        $('#remove_coupon').attr("style", "display:none");
+                        $("#apply_coupon").attr("style", "display:inline");
+
+                    }
+                }
+            });
         }
     </script>
     <%- include("../layout/footer.ejs") %>

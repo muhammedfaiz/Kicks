@@ -34,15 +34,18 @@ const wishListView = async (req, res) => {
   try {
     const userId = req.session.userId;
     const wishList = await wishListHelper.getAllItemsHelper(userId);
-    for (item of wishList.items) {
-      item.price = productHelper.currencyFormatter(item.product.price);
-      item.quantity =
-        item.product.stock[0].quantity +
-        item.product.stock[1].quantity +
-        item.product.stock[2].quantity; // get quantity from the first stock object in array
-        const cart = await cartHelper.cartCheck(item.product._id,userId);
-        item.inCart = cart;
+    if(wishList.items.lenght!==0){
+      for (item of wishList.items) {
+        item.price = productHelper.currencyFormatter(item.product.price);
+        item.quantity =
+          item.product.stock[0].quantity +
+          item.product.stock[1].quantity +
+          item.product.stock[2].quantity; // get quantity from the first stock object in array
+          const cart = await cartHelper.cartCheck(item.product._id,userId);
+          item.inCart = cart;
+      }
     }
+
     if (wishList) {
       res.render("frontend/wishList", { wishlist: wishList, user: userId });
     }

@@ -55,8 +55,37 @@ const changeOrderStatus = async (req, res) => {
   }
 };
 
+const returnOrdersList = async(req,res)=>{
+  try {
+    const orders = await orderHelper.getAllReturns();
+    for (const order of orders) {
+      order.orderedDate = moment(order.orderedOn).format("DD-MM-YYYY");
+    }
+    res.render('backend/orderReturn',{orders});
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const orderReturned = async(req,res)=>{
+  try {
+    const orderId = req.params.orderId;
+    const itemId = req.params.itemId;
+    const data = await orderHelper.orderReturnedHelper(orderId,itemId);
+    if(data){
+      res.json({status:true});
+    }else{
+      res.json({status:false});
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   orderList,
   orderDetails,
   changeOrderStatus,
+  returnOrdersList,
+  orderReturned
 };

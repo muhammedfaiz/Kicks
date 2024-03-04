@@ -21,6 +21,7 @@
                                         <tr class="main-heading">
                                             <th scope="col">Image</th>
                                             <th scope="col">Name</th>
+                                            <th scope="col">Price</th>
                                             <th scope="col">Size</th>
                                             <th scope="col">Quantity</th>
                                             <th scope="col">Status</th>
@@ -40,6 +41,11 @@
                                                     <p class="font-xs">
                                                         <%= item.product.brandName%>
                                                     </p>
+                                                </td>
+                                                <td class="price">
+                                                    <span id="price">
+                                                        <%= item.offerPrice %>
+                                                    </span>
                                                 </td>
                                                 <td class="size" data-title="Size"><span id="price">
                                                         <%= item.size%>
@@ -101,7 +107,7 @@
                                 <%}%>
                         </div>
                         <div class="cart-action text-end">
-                            <a class="btn " href="/"><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
+                            <a class="btn" href="/download-invoice/<%= data._id %>">Download Invoice</a>
                         </div>
                         <div class="divider center_icon mt-50 mb-50"><i class="fi-rs-fingerprint"></i></div>
                         <div class="row mb-50">
@@ -143,15 +149,23 @@
                                                 <tbody>
                                                     <tr>
                                                         <td class="cart_total_label">Order Subtotal</td>
+
                                                         <td class="cart_total_amount"><span
                                                                 class="font-lg fw-900 text-brand" id="total_amount">
                                                                 <%= data.orderTotal%>
                                                             </span></td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="cart_total_label">Shipping</td>
-                                                        <td class="cart_total_amount"> <i class="ti-gift mr-5"></i> Free
-                                                            Shipping</td>
+                                                        <td class="cart_total_label">Coupon</td>
+                                                        <% if (data.coupon) { %>
+
+                                                            <td class="cart_total_amount"> <i class="ti-gift mr-5"></i>
+                                                                <%= data.coupon %>
+                                                            </td>
+                                                            <% } else { %>
+                                                                <td class="cart_total_amount"> <i
+                                                                        class="ti-gift mr-5"></i> No Coupons</td>
+                                                                <% } %>
                                                     </tr>
                                                     <tr>
                                                         <td class="cart_total_label">Total</td>
@@ -161,10 +175,25 @@
                                                                 </span></strong>
                                                         </td>
                                                     </tr>
+                                                    <% if (data.status==="Payment Pending" ) { %>
+                                                        <tr>
+                                                            <td class="cart_payment_status">Status</td>
+                                                            <td class="cart_total_amount"><strong><span
+                                                                        class="font-xl fw-900 text-brand" id="allTotal">
+                                                                        <%= data.status%>
+                                                                    </span></strong>
+                                                            </td>
+                                                        </tr>
+                                                        <% } %>
                                                 </tbody>
                                             </table>
                                         </div>
-
+                                        <% if (data.status==="Payment Pending" ) { %>
+                                            <div class="d-flex justify-content-center align-items-center">
+                                                <button onclick="payNow('<%= data.total%>','<%= data._id%>')"
+                                                    class="btn" id="payNow">Pay Now</button>
+                                            </div>
+                                            <% } %>
                                     </div>
                                 </div>
                                 <% }%>
@@ -227,6 +256,74 @@
 
                 }
             })
+        }
+
+        function payNow(price,orderId) {
+            const data = {
+                price: Number(price)
+            }
+            $.ajax({
+                url:"/pay-later",
+                method:"POST",
+                data:data,
+                success:function(res){
+                    razorPay(res.data, res.user,orderId);
+                }
+            })
+        }
+
+        function razorPay(order, user,orderId) {
+            var options = {
+                "key": "rzp_test_FTCuFqtfsLPk6w", // Enter the Key ID generated from the Dashboard
+                "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                "currency": "INR",
+                "name": "Kicks", //your business name
+                "description": "Test Transaction",
+                "image": "../../public/user/imgs/theme/logo.png",
+                "handler": function (response) {
+                    handleSuccess(response, order,orderId);
+                },
+                "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
+                    "name": user.name, //your customer's name
+                    "email": user.email,
+                    "contact": user.mobile //Provide the customer's phone number for better conversion rates 
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                },
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open("payNow");
+            rzp1.on("payment.failed", function (err) {
+                handleSuccess(err, order);
+            });
+
+        }
+        function handleSuccess(response, order,orderId) {
+            
+            let data = {
+                orderId:orderId
+            }
+            $.ajax({
+                url: "/verify-payment",
+                method: "POST",
+                data: {
+                    payment: response,
+                    order: order,
+                    data: data
+                },
+                success: function (res) {
+                    if (res.success) {
+                        window.location.href = "/order-placed";
+                    } else {
+                        window.location.href = "/order-detail/" + res.orderId;
+                    }
+                }
+            });
         }
     </script>
     <%- include("../layout/footer.ejs") %>

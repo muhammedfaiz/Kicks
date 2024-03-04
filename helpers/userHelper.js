@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const ObjectId = require("mongoose").Types.ObjectId;
+const jwt = require("jsonwebtoken");
 
 const loginHelper = (userData) => {
   return new Promise(async (resolve, reject) => {
@@ -55,6 +56,8 @@ const getUserHelper = (id) => {
       const user = await User.findById(id);
       if (user) {
         resolve(user);
+      } else {
+        resolve(false);
       }
     } catch (error) {
       console.log(error);
@@ -185,6 +188,90 @@ const editAddressHelper = (addressId, userId, data) => {
   });
 };
 
+const getWallet = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await User.findOne({ _id: userId }, { _id: 0, wallet: 1 });
+      if (result) {
+        resolve(result.wallet);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const getUserEmailHelper = (email) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const user = await User.findOne({ email: email });
+      if (user) {
+        resolve(user);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const createWebtoken = (id, email, pass) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const secret = process.env.JWT_SECRET + pass;
+      const payload = {
+        email: email,
+        id: id,
+      };
+      const token = jwt.sign(payload, secret, { expiresIn: "15m" });
+      const link = `http://localhost:2500/reset-password/${id}/${token}`;
+      resolve(link);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const createTokenVerify = (token, pass) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const secret = process.env.JWT_SECRET + pass;
+      const payload = jwt.verify(token, secret);
+      if (payload) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const resetPasswordHelper = (id, password) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const pass = bcrypt.hashSync(password, 10);
+      const update = await User.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            password: pass,
+          },
+        }
+      );
+      if (update.acknowledged) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
 module.exports = {
   loginHelper,
   signupHelper,
@@ -194,4 +281,9 @@ module.exports = {
   editUserDetailsHelper,
   editAddressLoadHelper,
   editAddressHelper,
+  getWallet,
+  getUserEmailHelper,
+  createWebtoken,
+  createTokenVerify,
+  resetPasswordHelper,
 };

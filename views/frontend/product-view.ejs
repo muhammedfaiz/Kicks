@@ -78,7 +78,7 @@
                                                         </span></ins>
                                                     <ins><span class="old-price font-md ml-15"><%= product.originalPrice%>
                                                         </span></ins>
-                                                    <span class="save-price  font-md color3 ml-15"><%= product.discount%>% Off</span>
+                                                    <span class="save-price  font-md color3 ml-15"><span id="discount"><%= product.offer%></span>% Off</span>
                                                 </div>
                                             </div>
                                             <div class="bt-1 border-color-1 mt-15 mb-15"></div>
@@ -143,7 +143,6 @@
                                                 </div>
                                             </div>
                                             <ul class="product-meta font-xs color-grey mt-50">
-                                                <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
                                                 <li class="mb-5">Category: <%= product.category.name%>
                                                 </li>
                                                 <li>Availability:
@@ -528,11 +527,18 @@
             }else{
                 size="M"
             }
+            const discount = $("#discount").html();
+            let data={
+                id:id,
+                size:size,
+                discount:discount
+            }
             $.ajax({
-                url: `/cart/${id}/${size}`,
+                url: `/cart`,
                 method: "POST",
+                data:data,
                 success: function (response) {
-                    if (response.status) {
+                    if (response.success) {
                         Toastify({
                             text: "Product added to cart successfully!",
                             duration: 3000, // Customize duration as needed
@@ -545,7 +551,18 @@
                         setTimeout(() => {
                             location.reload();
                         }, 1000);
-                    } else {
+                    } else if(response.message){
+                        Toastify({
+                            text: response.message,
+                            duration: 3000, // Customize duration as needed
+                            gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+                            position: "center", // Align toast (center, left, right)
+                            style: {
+                                background: "red", 
+                            }
+                        }).showToast();
+                    }
+                    else {
                         Toastify({
                             text: "Failed to add product to cart. Please try again.",
                             duration: 3000,

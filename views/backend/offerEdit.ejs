@@ -18,7 +18,8 @@
                 <div class="card mb-4">
 
                     <div class="card-body">
-                        <form method="post" action="/admin/offer-edit/<%= offer._id%>?_method=PUT">
+                        <form method="post" action="/admin/offer-edit/<%= offer._id%>?_method=PUT"
+                            onsubmit="return validateOffer()">
                             <input type="hidden" name="_method" value="PUT">
                             <div class="mb-4">
                                 <label for="offer_name" class="form-label">Offer Name</label>
@@ -30,13 +31,13 @@
                                 <label for="start_date" class="form-label">Start Date</label>
                                 <input type="date" class="form-control" id="start_date" name="startDate"
                                     value="<%= offer.initialDate %>">
-                                <span id="error-code" class="text-danger m-3"></span>
+                                <span id="error-startDate" class="text-danger m-3"></span>
                             </div>
                             <div class="mb-4">
                                 <label for="end_date" class="form-label">End Date</label>
                                 <input type="date" class="form-control" id="end_date" name="endDate"
                                     value="<%= offer.expiryDate %>">
-                                <span id="error-discount" class="text-danger m-3"></span>
+                                <span id="error-endDate" class="text-danger m-3"></span>
                             </div>
                             <div class="mb-4">
                                 <label for="product" class="form-label">Product</label>
@@ -48,13 +49,13 @@
                                         </option>
                                         <% }) %>
                                 </select>
-
+                                <span class="text-damger m-3" id="error-product"></span>
                             </div>
                             <div class="mb-4">
                                 <label for="product_discount" class="form-label">Product Discount</label>
                                 <input type="text" placeholder="Type here" class="form-control" id="product_discount"
                                     name="productDiscount" value="<%= offer.productOffer.discount %>">
-                                <span id="error-product" class="text-danger m-3"></span>
+                                <span id="error-productDiscount" class="text-danger m-3"></span>
                             </div>
                             <div class="mb-4">
                                 <label for="category" class="form-label">Category</label>
@@ -66,13 +67,13 @@
                                         </option>
                                         <% }) %>
                                 </select>
-
+                                <span class="text-damger m-3" id="error-category"></span>
                             </div>
                             <div class="mb-4">
                                 <label for="category_discount" class="form-label">Category Discount</label>
                                 <input type="text" placeholder="Type here" class="form-control" id="category_discount"
                                     name="categoryDiscount" value="<%= offer.categoryOffer.discount %>">
-                                <span id="error-expiry" class="text-danger m-3"></span>
+                                <span id="error-categoryDiscount" class="text-danger m-3"></span>
                             </div>
                             <div class="mb-4">
                                 <div class="form-check">
@@ -101,4 +102,66 @@
 
         </div>
     </section>
+    <script>
+        function validateOffer() {
+            const nameRegex = /^[a-zA-Z]+(?:[' -][a-zA-Z]+)*$/;
+            const discountRegex = /^[1-9]\d*$/;
+            let isValid = true;
+
+
+
+            // Check each field
+            if ($("#offer_name").val().trim() === '' || !nameRegex.test($("#offer_name").val())) {
+                $("#error-name").html("Enter Valid Name");
+                isValid = false;
+            } else {
+                $("#error-name").html("");
+            }
+
+            if ($("#start_date").val().trim() === '') {
+                $("#error-startDate").html("Start Date is required");
+                isValid = false;
+            } else {
+                $("#error-startDate").html("");
+            }
+
+            if ($("#end_date").val().trim() === '') {
+                $("#error-endDate").html("End Date is required");
+                isValid = false;
+            } else {
+                $("#error-endDate").html("");
+            }
+
+            if ($("#product").val() === '') {
+                $("#error-product").html("Select a Product");
+                isValid = false;
+            } else {
+                $("#error-product").html("");
+            }
+
+            if (!discountRegex.test($("#product_discount").val())) {
+                $("#error-productDiscount").html("Enter Valid Product Discount");
+                isValid = false;
+            } else {
+                $("#error-productDiscount").html("");
+            }
+
+            if ($("#category").val() === '') {
+                $("#error-category").html("Select a Category");
+                isValid = false;
+            } else {
+                $("#error-category").html("");
+            }
+
+            if (!discountRegex.test($("#category_discount").val())) {
+                $("#error-categoryDiscount").html("Enter Valid Category Discount");
+                isValid = false;
+            } else {
+                $("#error-categoryDiscount").html("");
+            }
+
+            return isValid;
+        }
+
+    </script>
     <%- include ('../layout/footerBack.ejs') %>

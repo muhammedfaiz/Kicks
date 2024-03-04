@@ -10,15 +10,15 @@
                     <div class="success text-success mb-4 mx-2" id="success">
                         <%= message %>
                     </div>
-                <% } %>
-                <div class="error text-danger mb-4 mx-2" id="error">
-                </div>
+                    <% } %>
+                        <div class="error text-danger mb-4 mx-2" id="error">
+                        </div>
             </div>
             <div class="col-lg-6">
                 <div class="card mb-4">
 
                     <div class="card-body">
-                        <form method="post" action="/admin/coupon-add">
+                        <form method="post" action="/admin/coupon-add" onsubmit="return validateCoupon()">
                             <div class="mb-4">
                                 <label for="coupon_name" class="form-label">Coupon Name</label>
                                 <input type="text" placeholder="Type here" class="form-control" id="coupon_name"
@@ -32,10 +32,28 @@
                                 <span id="error-code" class="text-danger m-3"></span>
                             </div>
                             <div class="mb-4">
+                                <label for="coupon_description" class="form-label">Coupon description</label>
+                                <textarea cols="5" rows="10" placeholder="Type here" class="form-control"
+                                    id="coupon_description" name="description"></textarea>
+                                <span id="error-description" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
                                 <label for="coupon_discount" class="form-label">Coupon Discount</label>
                                 <input type="text" placeholder="Type here" class="form-control" id="coupon_discount"
                                     name="discount">
                                 <span id="error-discount" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label for="min_amount" class="form-label">Minimum Purcahse Amount</label>
+                                <input type="text" placeholder="Type here" class="form-control" id="min_amount"
+                                    name="minAmount">
+                                <span id="error-min" class="text-danger m-3"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label for="max_amount" class="form-label">Maximum Purchase Amount</label>
+                                <input type="text" placeholder="Type here" class="form-control" id="max_amount"
+                                    name="maxAmount">
+                                <span id="error-max" class="text-danger m-3"></span>
                             </div>
                             <div class="mb-4">
                                 <label for="coupon_expiry" class="form-label">Coupon Expiry</label>
@@ -70,4 +88,53 @@
 
         </div>
     </section>
+    <script>
+        function validateCoupon() {
+            const nameRegex = /^[a-zA-Z]+(?:[' -][a-zA-Z]+)*$/;
+            const discountRegex = /^[1-9]\d*$/;
+            let isValid = true;
+
+            // Reset error messages
+            $(".text-danger").html("");
+
+            // Check each field
+            if ($("#coupon_name").val().trim() === '') {
+                $("#error-name").html("Coupon Name is required");
+                isValid = false;
+            }
+
+            if ($("#coupon_code").val().trim() === '') {
+                $("#error-code").html("Coupon Code is required");
+                isValid = false;
+            }
+
+            if($("#coupon_description").val().trim()===""){
+                $("#error-description").html("Coupon description is required");
+                isValid = false;
+            }
+
+            if (!discountRegex.test($("#coupon_discount").val())) {
+                $("#error-discount").html("Enter a valid Coupon Discount");
+                isValid = false;
+            }
+
+            if (!discountRegex.test($("#min_amount").val())) {
+                $("#error-min").html("Enter valid minimum amount");
+                isValid = false;
+            }
+
+            if (!discountRegex.test($("#max_amount").val())) {
+                $("#error-max").html("Enter valid maximum amount");
+                isValid = false;
+            }
+
+            if ($("#coupon_expiry").val().trim() === '') {
+                $("#error-expiry").html("Coupon Expiry is required");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+    </script>
     <%- include("../layout/footerBack.ejs") %>

@@ -1,22 +1,35 @@
 const Cart = require("../models/cartModel");
 const mongoose = require("mongoose");
 const Product = require("../models/productModel");
+const offerHelper = require("./offerHelper");
 const ObjectId = require("mongoose").Types.ObjectId;
 // add cart helper
 
-const addToCartHelper = (prodId, userId, size) => {
+const addToCartHelper = (prodId, userId, size, discount) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const result = await Cart.updateOne(
-        { user: new mongoose.Types.ObjectId(userId) },
-        {
-          $push: {
-            items: { product: new mongoose.Types.ObjectId(prodId), size: size },
+      const product = await Product.aggregate([
+        { $unwind: "$stock" },
+        { $match: { _id: new ObjectId(prodId), "stock.size": size } },
+      ]);
+      if (product && product[0].stock.quantity > 0) {
+        const result = await Cart.updateOne(
+          { user: new mongoose.Types.ObjectId(userId) },
+          {
+            $push: {
+              items: {
+                product: new mongoose.Types.ObjectId(prodId),
+                size: size,
+                discount: discount,
+              },
+            },
           },
-        },
-        { upsert: true }
-      );
-      resolve(result);
+          { upsert: true }
+        );
+        resolve(result);
+      } else {
+        resolve("product is not in stock");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -42,10 +55,50 @@ const getAllItems = (id) => {
     const data = await Cart.findOne({ user: id }).populate("items.product");
     if (data) {
       let total = 0;
+      const currentDate = new Date();
+      const offer = await offerHelper.getActiveOffer(currentDate);
+      let offerPrice;
       for (let i = 0; i < data.items.length; i++) {
-        const offerPrice =
-          data.items[i].product.price -
-          (data.items[i].product.price * data.items[i].product.discount) / 100;
+        const productOffer = offer.find((item) =>
+          item.productOffer.product._id.equals(data.items[i].product._id)
+        );
+        const categoryOffer = offer.find((item) =>
+          item.categoryOffer.category._id.equals(data.items[i].product.category)
+        );
+        if (productOffer && categoryOffer) {
+          if (
+            productOffer.productOffer.discount >
+            categoryOffer.categoryOffer.discount
+          ) {
+            offerPrice =
+              data.items[i].product.price -
+              (data.items[i].product.price *
+                productOffer.productOffer.discount) /
+                100;
+          } else {
+            offerPrice =
+              data.items[i].product.price -
+              (data.items[i].product.price *
+                categoryOffer.categoryOffer.discount) /
+                100;
+          }
+        } else if (productOffer) {
+          offerPrice =
+            data.items[i].product.price -
+            (data.items[i].product.price * productOffer.productOffer.discount) /
+              100;
+        } else if (categoryOffer) {
+          offerPrice =
+            data.items[i].product.price -
+            (data.items[i].product.price *
+              categoryOffer.categoryOffer.discount) /
+              100;
+        } else {
+          offerPrice =
+            data.items[i].product.price -
+            (data.items[i].product.price * data.items[i].product.discount) /
+              100;
+        }
         total += Math.round(data.items[i].quantity * offerPrice);
         const priceAdd = await Cart.updateOne(
           { user: id, "items._id": data.items[i]._id },
@@ -104,7 +157,7 @@ const updateQuantityHelper = (increaseQuantity, itemId, userId) => {
       for (let i = 0; i < data.items.length; i++) {
         const offerPrice =
           data.items[i].product.price -
-          (data.items[i].product.price * data.items[i].product.discount) / 100;
+          (data.items[i].product.price * data.items[i].discount) / 100;
         total += Math.round(data.items[i].quantity * offerPrice);
         const priceAdd = await Cart.updateOne(
           { user: userId, "items._id": data.items[i]._id },
@@ -185,6 +238,17 @@ const checkoutgetCart = (userId) => {
   });
 };
 
+const getUserCart = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const userCart = await Cart.findOne({ user: userId });
+      resolve(userCart);
+    } catch (error) {
+      cosnole.log(error);
+    }
+  });
+};
+
 module.exports = {
   addToCartHelper,
   cartCheck,
@@ -194,4 +258,5 @@ module.exports = {
   emptyCart,
   getCartItem,
   checkoutgetCart,
+  getUserCart,
 };

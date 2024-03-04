@@ -1,4 +1,7 @@
+const { EventEmitterAsyncResource } = require("nodemailer/lib/xoauth2");
 const Offer = require("../models/offerModel");
+const Product = require("../models/productModel");
+const productHelper = require("../helpers/productHelper");
 
 const offerAddHelper = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -97,10 +100,129 @@ const offerEditHelper = (offerId, data) => {
   });
 };
 
+const getActiveOffer = (date) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const offer = await Offer.find({
+        startDate: { $lte: date },
+        endDate: { $gte: date },
+        status: true,
+      })
+        .populate("productOffer.product")
+        .populate("categoryOffer.category");
+      resolve(offer);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const getproductOffer = (prodId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const offer = await Offer.findOne({
+        "productOffer.product": prodId,
+        status: true,
+      });
+      if (offer) {
+        resolve(offer.productOffer);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const getCategoryOffer = (catId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const offer = await Offer.findOne({
+        "categoryOffer.category": catId,
+        status: true,
+      });
+      if (offer) {
+        resolve(offer.categoryOffer);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
+const offerFind = (products) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const currentDate = new Date();
+      const offer = await getActiveOffer(currentDate);
+      for (let i = 0; i < products.length; i++) {
+        const productOffer = offer.find((item) =>
+          item.productOffer.product._id.equals(products[i]._id)
+        );
+        const categoryOffer = offer.find((item) =>
+          item.categoryOffer.category._id.equals(products[i].category._id)
+        );
+        if (productOffer && categoryOffer) {
+          if (
+            productOffer.productOffer.discount >
+            categoryOffer.categoryOffer.discount
+          ) {
+            const offerPrice =
+              products[i].price -
+              (products[i].price * productOffer.productOffer.discount) / 100;
+            products[i].offerPrice = productHelper.currencyFormatter(
+              Math.round(offerPrice)
+            );
+          } else {
+            const offerPrice =
+              products[i].price -
+              (products[i].price * categoryOffer.categoryOffer.discount) / 100;
+            products[i].offerPrice = productHelper.currencyFormatter(
+              Math.round(offerPrice)
+            );
+          }
+        } else if (productOffer) {
+          const offerPrice =
+            products[i].price -
+            (products[i].price * productOffer.productOffer.discount) / 100;
+          products[i].offerPrice = productHelper.currencyFormatter(
+            Math.round(offerPrice)
+          );
+        } else if (categoryOffer) {
+          const offerPrice =
+            products[i].price -
+            (products[i].price * categoryOffer.categoryOffer.discount) / 100;
+          products[i].offerPrice = productHelper.currencyFormatter(
+            Math.round(offerPrice)
+          );
+        } else {
+          const offerPrice =
+            products[i].price -
+            (products[i].price * products[i].discount) / 100;
+          products[i].offerPrice = productHelper.currencyFormatter(
+            Math.round(offerPrice)
+          );
+        }
+        products[i].price = productHelper.currencyFormatter(products[i].price);
+      }
+      resolve(products);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+};
+
 module.exports = {
   offerAddHelper,
   getAllOffer,
   offerStatusHelper,
   getSingleOffer,
   offerEditHelper,
+  getActiveOffer,
+  getproductOffer,
+  getCategoryOffer,
+  offerFind,
 };

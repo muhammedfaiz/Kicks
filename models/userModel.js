@@ -28,27 +28,32 @@ const userSchema = mongoose.Schema({
     default: true,
   },
   wallet: {
-    type: Array,
-    default: [
+    balance: { type: Number, default: 0 },
+    details: [
       {
-        balance: 0,
-        paymentMethod: null,
-        transaction_id: null,
-        date: null,
-        withdrawal: null,
-        deposit: null,
+        type: { type: String, enum: ["credit", "debit", "refund"] },
+        amount: { type: Number },
+        date: { type: Date },
+        transactionId: {
+          type: Number,
+          default: function () {
+            return Math.floor(100000 + Math.random() * 900000);
+          },
+        },
       },
     ],
   },
-  address: [{
-    name:{type:String},
-    house:{type:String},
-    city:{type:String},
-    state:{type:String},
-    country:{type:String},
-    pincode:{type:Number},
-    type:{type:Number}
-  }],
+  address: [
+    {
+      name: { type: String },
+      house: { type: String },
+      city: { type: String },
+      state: { type: String },
+      country: { type: String },
+      pincode: { type: Number },
+      type: { type: Number },
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);

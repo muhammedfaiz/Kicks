@@ -8,18 +8,21 @@ const moment = require("moment");
 const homeLoad = async (req, res) => {
   try {
     let products;
-    const userId = req.session.userId;
     if (req.query.search) {
       products = await productHelper.activeProductList(req.query.search);
     } else {
       products = await productHelper.activeProductList();
     }
     const offerProducts = await offerHelper.offerFind(products);
-
-    res.render("frontend/home", {
-      products: offerProducts,
-      user: userId,
-    });
+    if(req.session.userId){
+      const userId = req.session.userId;
+      res.render("frontend/home", {
+        products: offerProducts,
+        user: userId,
+      });
+    }else{
+      res.render("frontend/home",{products:offerProducts,user:null});
+    }
   } catch (error) {
     console.log(error);
   }

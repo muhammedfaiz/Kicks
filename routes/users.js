@@ -25,15 +25,14 @@ router.post(
   userAuthController.otpSubmit
 );
 
-router.get("/", middleware.isLogin, userController.homeLoad);
+router.get("/", userController.homeLoad);
 
 router.get(
   "/product-view/:id",
-  middleware.isLogin,
   productController.productView
 );
 
-router.post("/cart", productController.addToCart);
+router.post("/cart",middleware.toLogin, productController.addToCart);
 
 router.get("/cart", middleware.isLogin, cartController.getAllCart);
 
@@ -89,7 +88,7 @@ router.post("/apply-coupon", couponController.applyCoupon);
 
 router.post("/remove-coupon", couponController.removeCoupon);
 
-router.get("/shop", middleware.isLogin, productController.shopView);
+router.get("/shop", productController.shopView);
 
 router.get("/download-invoice/:id", orderController.invoiceGenerator);
 

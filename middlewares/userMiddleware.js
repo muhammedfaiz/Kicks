@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
 const isLogin = (req, res, next) => {
   if (!req.session.userId) {
-    res.redirect("/login");
+    res.redirect("/");
   } else {
     next();
   }
@@ -23,4 +23,12 @@ const otpTimeExpiry = (req, res, next) => {
   }
 };
 
-module.exports = { isLogin, otpTimeExpiry, notLogin };
+const toLogin = (req,res,next)=>{
+  if(!req.session.userId){
+    res.redirect("/login");
+  }else{
+    next();
+  }
+}
+
+module.exports = { isLogin, otpTimeExpiry, notLogin ,toLogin};

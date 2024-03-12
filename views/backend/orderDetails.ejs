@@ -61,6 +61,7 @@
                             <div class="text">
                                 <h6 class="mb-1">Deliver to</h6>
                                 <p class="mb-1">
+                                    Name: <%= details.address.name %><br>
                                     City: <%= details.address.city %> <br>
                                         <%= details.address.house %>,<%= details.address.state %> <br>
                                                 <%= details.address.pincode %>
@@ -136,14 +137,15 @@
                                                                 <%= details.allTotal %>
                                                             </b> </dd>
                                                     </dl>
-                                                    <dl class="dlist">
-                                                        <dt class="text-muted">Status:</dt>
-                                                        <dd>
-                                                            <span
-                                                                class="badge rounded-pill alert-success text-success">Cash
-                                                                On Delivery</span>
-                                                        </dd>
-                                                    </dl>
+                                                    <% if (details.coupon) { %>
+                                                        <dl class="dl-list d-flex align-items-center">
+                                                            <dt>Coupon:</dt>
+                                                            <dd><b class="h5 ms-5">
+                                                                <%= details.coupon %>
+                                                            </b>(Rs.<%= details.couponDiscount %>)</dd>
+                                                        </dl>
+                                                    <% } %>
+                                                    
                                                 </article>
                                             </td>
                                             </tr>

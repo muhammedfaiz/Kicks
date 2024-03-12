@@ -46,13 +46,14 @@ const orderSchema = new mongoose.Schema({
 
   total: { type: Number },
   coupon: { type: String },
+  couponDiscount: { type: Number },
+  originalTotal: { type: Number },
   status: {
     type: String,
-    enum: ["Pending", "Delivered","Payment Pending"],
+    enum: ["Pending", "Delivered", "Payment Pending"],
     default: "Pending",
   },
 });
-
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

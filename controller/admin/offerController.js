@@ -33,7 +33,9 @@ const offerAdd = async (req, res) => {
 
 const offerList = async (req, res) => {
   try {
-    const offers = await offerHelper.getAllOffer();
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 5;
+    const offers = await offerHelper.getAllOffer(page, pageSize);
     for (const offer of offers) {
       offer.initialDate = moment(offer.startDate).format("DD-MM-YYYY");
       offer.expiryDate = moment(offer.endDate).format("DD-MM-YYYY");
@@ -90,6 +92,16 @@ const offerEdit = async (req, res) => {
   }
 };
 
+const deleteOffer = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await offerHelper.deleteOfferHelper(id);
+    res.json({ status: result });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   offerAddLoad,
   offerAdd,
@@ -97,4 +109,5 @@ module.exports = {
   offerStatus,
   offerEditLoad,
   offerEdit,
+  deleteOffer,
 };

@@ -25,9 +25,10 @@ const adminGetter = (adminData) => {
   });
 };
 
-const userListHelper = ()=>{
+const userListHelper = (page,pageSize)=>{
   return new Promise (async(resolve,reject)=>{
-    const user = await User.find({});
+    const skip = (page-1)*pageSize;
+    const user = await User.find({}).skip(skip).limit(pageSize);
     if(user){
       resolve(user);
     }else{

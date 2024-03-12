@@ -2,7 +2,9 @@ const adminHelper = require('../../helpers/adminHelper');
 // user-list
 const userList = async (req, res) => {
     try {
-      const result = await adminHelper.userListHelper();
+      const page = parseInt(req.query.page)||1;
+      const pageSize = 5;
+      const result = await adminHelper.userListHelper(page,pageSize);
       res.render("backend/userList", { users: result });
     } catch (error) {
       console.log(error);

@@ -6,11 +6,14 @@ const PDFDocument = require("pdfkit");
 const generateSalesReport = async (req, res) => {
   try {
     let salesData;
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 5;
+
     if (req.query) {
       const { startDate, endDate } = req.query;
-      salesData = await salesReportHelper.getSalesData(startDate, endDate);
+      salesData = await salesReportHelper.getSalesData(startDate, endDate,page,pageSize);
     } else {
-      salesData = await salesReportHelper.getSalesData();
+      salesData = await salesReportHelper.getSalesData(null,null,page,pageSize);
     }
     for (let data of salesData.orders) {
       data.allTotal = productHelper.currencyFormatter(Math.round(data.total));
@@ -33,7 +36,7 @@ const getSalesData = async (req, res) => {
   try {
     const month = await salesReportHelper.getChartDataPerMonth();
     const year = await salesReportHelper.getChartDataPerYear();
-    res.json({ month,year });
+    res.json({ month, year });
   } catch (error) {
     console.log(error);
   }

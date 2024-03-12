@@ -1,137 +1,179 @@
 <%- include("../layout/headerBack.ejs") %>
-    <section class="content-main">
-        <div class="content-header">
-            <div>
-                <h2 class="content-title card-title">Offer List</h2>
-                <p>All Offers.</p>
-            </div>
+<section class="content-main">
+  <div class="content-header">
+    <div>
+      <h2 class="content-title card-title">Offer List</h2>
+      <p>All Offers.</p>
+    </div>
+  </div>
+  <div class="card mb-4">
+    <header class="card-header"></header>
+    <!-- card-header end// -->
+    <div class="card-body">
+      <% if(offers !=='undefined' && offers.length> 0){%>
+      <%offers.forEach(function (offer){%>
+      <article class="itemlist">
+        <div class="row align-items-center">
+          <div class="col-lg-1 col-sm-4 col-6 flex-grow-1 col-name">
+            <a class="itemside" href="#">
+              <div class="info">
+                <h6 class="mb-0"><%= offer.name%></h6>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
+            <a class="itemside" href="#">
+              <div class="info">
+                <h6 class="mb-0">
+                  product: <%= offer.productOffer.product.name%>
+                </h6>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
+            <a class="itemside" href="#">
+              <div class="info">
+                <h6 class="mb-0">
+                  category: <%= offer.categoryOffer.category.name%>
+                </h6>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-1 col-sm-4 col-6 flex-grow-1 col-name">
+            <a class="itemside" href="#">
+              <div class="info">
+                <p class="mb-0">Start:<%= offer.initialDate%></p>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
+            <a class="itemside" href="#">
+              <div class="info">
+                <p class="mb-0">End:<%= offer.expiryDate%></p>
+              </div>
+            </a>
+          </div>
+          <% if (offer.status===true) { %>
+          <div
+            class="col-lg-2 col-sm-2 col-2 col-status d-flex justify-content-center"
+          >
+            <span
+              id="statusButton_<%= offer._id %>"
+              class="btn btn-sm rounded-pill alert-success"
+              onclick="toggleOfferStatus('<%= offer._id %>')"
+              >Active</span
+            >
+          </div>
+          <% } else { %>
+          <div
+            class="col-lg-2 col-sm-2 col-2 col-status d-flex justify-content-center"
+          >
+            <span
+              id="statusButton_<%= offer._id %>"
+              class="btn btn-sm rounded-pill alert-danger"
+              onclick="toggleOfferStatus('<%= offer._id %>')"
+              >Disabled</span
+            >
+          </div>
+          <% } %>
 
+          <div
+            class="col-lg-2 col-sm-4 col-6 col-action d-flex justify-content-evenly"
+          >
+            <a
+              href="/admin/offer-edit/<%= offer._id%>"
+              class="btn btn-sm font-sm rounded btn-brand d-flex justify-content-center align-items-center"
+            >
+              <i class="material-icons md-edit"></i> Edit
+            </a>
+            <a
+              class="btn btn-sm font-sm btn-light rounded d-flex justify-content-center align-items-center"
+              onclick="offerDelete('<%= offer._id%>')"
+            >
+              <i class="material-icons md-delete_forever"></i> Delete
+            </a>
+          </div>
         </div>
-        <div class="card mb-4">
-            <header class="card-header">
-            </header> <!-- card-header end// -->
-            <div class="card-body">
-                <% if(offers !=='undefined' && offers.length> 0){%>
-                    <%offers.forEach(function (offer){%>
-                        <article class="itemlist">
-                            <div class="row align-items-center">
-                                <div class="col-lg-1 col-sm-4 col-6 flex-grow-1 col-name">
-                                    <a class="itemside" href="#">
-                                        <div class="info">
-                                            <h6 class="mb-0">
-                                                <%= offer.name%>
-                                            </h6>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
-                                    <a class="itemside" href="#">
-                                        <div class="info">
-                                            <h6 class="mb-0">
-                                                product: <%= offer.productOffer.product.name%>
-                                            </h6>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
-                                    <a class="itemside" href="#">
-                                        <div class="info">
-                                            <h6 class="mb-0">
-                                                category: <%= offer.categoryOffer.category.name%>
-                                            </h6>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="col-lg-1 col-sm-4 col-6 flex-grow-1 col-name">
-                                    <a class="itemside" href="#">
-                                        <div class="info">
-                                            <p class="mb-0">
-                                                Start:<%= offer.initialDate%>
-                                            </p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="col-lg-2 col-sm-4 col-6 flex-grow-1 col-name">
-                                    <a class="itemside" href="#">
-                                        <div class="info">
-                                            <p class="mb-0">
-                                                End:<%= offer.expiryDate%>
-                                            </p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <% if (offer.status===true) { %>
-                                    <div class="col-lg-2 col-sm-2 col-2 col-status d-flex justify-content-center">
-                                        <span id="statusButton_<%= offer._id %>"
-                                            class="btn btn-sm rounded-pill alert-success"
-                                            onclick="toggleOfferStatus('<%= offer._id %>')">Active</span>
-                                    </div>
-                                    <% } else { %>
-                                        <div class="col-lg-2 col-sm-2 col-2 col-status d-flex justify-content-center">
-                                            <span id="statusButton_<%= offer._id %>"
-                                                class="btn btn-sm rounded-pill alert-danger"
-                                                onclick="toggleOfferStatus('<%= offer._id %>')">Disabled</span>
-                                        </div>
-                                        <% } %>
+        <!-- row .// -->
+      </article>
+      <!-- itemlist  .// -->
+      <%})%> <% } else { %>
+      <div class="row">
+        <h4 class="text-dark">No Coupons Added</h4>
+      </div>
+      <%}%>
+    </div>
+    <!-- card-body end// -->
+  </div>
+  <!-- card end// -->
+  <div class="pagination-area mt-15 mb-50">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-start">
+        <li class="page-item"><a class="page-link" href="?page=1">01</a></li>
+        <li class="page-item"><a class="page-link" href="?page=2">02</a></li>
+        <li class="page-item"><a class="page-link" href="?page=3">03</a></li>
+        <li class="page-item"><a class="page-link" href="?page=4">04</a></li>
+        <li class="page-item"><a class="page-link" href="?page=5">05</a></li>
+      </ul>
+    </nav>
+  </div>
+</section>
 
-                                            <div
-                                                class="col-lg-2 col-sm-4 col-6 col-action d-flex justify-content-evenly">
-                                                <a href="/admin/offer-edit/<%= offer._id%>"
-                                                    class="btn btn-sm font-sm rounded btn-brand d-flex justify-content-center align-items-center">
-                                                    <i class="material-icons md-edit"></i> Edit
-                                                </a>
-                                            </div>
-                            </div> <!-- row .// -->
-                        </article> <!-- itemlist  .// -->
-                        <%})%>
-                            <% } else { %>
-                                <div class="row">
-                                    <h4 class="text-dark">No Coupons Added</h4>
-                                </div>
-                                <%}%>
-            </div> <!-- card-body end// -->
-        </div> <!-- card end// -->
-        <div class="pagination-area mt-30 mb-50">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-start">
-                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                    <li class="page-item"><a class="page-link" href="#">02</a></li>
-                    <li class="page-item"><a class="page-link" href="#">03</a></li>
-                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                    <li class="page-item"><a class="page-link" href="#">16</a></li>
-                    <li class="page-item"><a class="page-link" href="#"><i
-                                class="material-icons md-chevron_right"></i></a></li>
-                </ul>
-            </nav>
-        </div>
-    </section>
+<script>
+  function toggleOfferStatus(offerId) {
+    $.ajax({
+      url: "/admin/offer-status/" + offerId,
+      method: "PATCH",
+      success: (res) => {
+        if (res.status) {
+          Toastify({
+            text: "offer status changed",
+            duration: 3000, // Customize duration as needed
+            gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
+            position: "center", // Align toast (center, left, right)
+            stopOnFocus: true,
+            style: {
+              background: "red", // Green background
+            },
+          }).showToast();
 
-    <script>
-        function toggleOfferStatus(offerId) {
-            $.ajax({
-                url: "/admin/offer-status/" + offerId,
-                method: "PATCH",
-                success: (res) => {
-                    if (res.status) {
-                        Toastify(
-                            {
-                                text: "offer status changed",
-                                duration: 3000, // Customize duration as needed
-                                gravity: "top", // Choose placement (top, top-left, top-right, bottom, etc.)
-                                position: "center", // Align toast (center, left, right)
-                                stopOnFocus: true,
-                                style: {
-                                    background: "red", // Green background
-                                },
-                            }
-                        ).showToast();
-
-                        setTimeout(() => {
-                            location.reload();
-                        }, 3000);
-                    }
-                }
-            })
+          setTimeout(() => {
+            location.reload();
+          }, 3000);
         }
-    </script>
-    <%- include("../layout/footerBack.ejs") %>
+      },
+    });
+  }
+
+  function offerDelete(offerId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Delete the offer!!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, change!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url: `/admin/offer-delete/${offerId}`,
+          method: "DELETE",
+          success: function () {
+            Swal.fire(
+              "Deleted!",
+              "Your offer has been deleted.",
+              "success"
+            ).then(() => {
+              location.reload();
+            });
+          },
+          error: function () {
+            Swal.fire("Error!", "Could not delete the offer.", "error");
+          },
+        });
+      }
+    });
+  }
+</script>
+<%- include("../layout/footerBack.ejs") %>

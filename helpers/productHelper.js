@@ -1,6 +1,8 @@
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const ObjectId = require("mongoose").Types.ObjectId;
+const fs = require("fs");
+const path = require("path");
 
 const productAddHelper = (data, files) => {
   return new Promise(async (resolve, reject) => {
@@ -50,8 +52,9 @@ const productCategoryList = () => {
   });
 };
 
-const productListHelper = () => {
+const productListHelper = (page, pageSize) => {
   return new Promise(async (resolve, reject) => {
+    const skip = (page - 1) * pageSize;
     const products = await Product.aggregate([
       {
         $unwind: "$stock",
@@ -92,6 +95,12 @@ const productListHelper = () => {
           category: { $arrayElemAt: ["$category", 0] },
         },
       },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: pageSize,
+      },
     ]);
     if (products) {
       resolve(products);
@@ -112,7 +121,7 @@ const activeProductList = (search) => {
           foreignField: "_id",
         },
       },
-      {$unwind:"$category"},
+      { $unwind: "$category" },
       {
         $match: {
           $and: [
@@ -152,8 +161,14 @@ const productStatusHelper = (id) => {
 const productEditHelper = (id, data, files) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const product = await Product.find();
       const productImage = [];
-
+      if (files.lenght > 0) {
+        for (let image of product.images) {
+          const imagePath = path.join(__dirname, "public", image.data);
+          fs.unlinkSync(imagePath);
+        }
+      }
       for (let file of files) {
         productImage.push({
           data: file.filename,
@@ -287,9 +302,10 @@ const parseCurrencyString = (formattedString) => {
   return Number(formattedString.replace(/[^0-9.-]+/g, ""));
 };
 
-const shopViewHeleper = (category) => {
+const shopViewHeleper = (category, page, pageSize) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const skip = (page - 1) * pageSize;
       if (category) {
         const products = await Product.aggregate([
           {
@@ -312,9 +328,15 @@ const shopViewHeleper = (category) => {
               ],
             },
           },
+          {
+            $skip: skip,
+          },
+          {
+            $limit: pageSize,
+          },
         ]);
         resolve(products);
-      }  else {
+      } else {
         const products = await Product.aggregate([
           {
             $lookup: {
@@ -332,6 +354,12 @@ const shopViewHeleper = (category) => {
               $and: [{ status: true }, { "category.list": true }],
             },
           },
+          {
+            $skip: skip,
+          },
+          {
+            $limit: pageSize,
+          },
         ]);
         resolve(products);
       }
@@ -340,8 +368,6 @@ const shopViewHeleper = (category) => {
     }
   });
 };
-
-
 
 module.exports = {
   productAddHelper,
@@ -355,5 +381,4 @@ module.exports = {
   currencyFormatter,
   parseCurrencyString,
   shopViewHeleper,
-  
 };

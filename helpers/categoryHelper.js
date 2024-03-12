@@ -1,9 +1,10 @@
 const Category = require("../models/categoryModel");
 const mongoose = require("mongoose");
 
-const categoryLoadHelper = () => {
+const categoryLoadHelper = (page, pageSize) => {
   return new Promise(async (resolve, reject) => {
-    const category = await Category.find({});
+    const skip = (page - 1) * pageSize;
+    const category = await Category.find({}).skip(skip).limit(pageSize);
     if (category) {
       resolve(category);
     } else {
@@ -74,9 +75,9 @@ const categoryRemoveHelper = (id) => {
 };
 
 const getActiveCategory = () => {
-  return new Promise(async(resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      const categories = await  Category.find({ list: true });
+      const categories = await Category.find({ list: true });
       resolve(categories);
     } catch (error) {
       console.log(error);
@@ -84,11 +85,27 @@ const getActiveCategory = () => {
   });
 };
 
+const categoryDeleteHelper = (id)=>{
+  return new Promise(async(resolve, reject) => { 
+    try {
+      const deleteCat = await Category.deleteOne({_id : id});
+      if(deleteCat){
+        resolve(true);
+      }else{
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+   });
+}
+
 module.exports = {
   categoryAddHelper,
   categoryLoadHelper,
   categoryEditLoadHelper,
   categoryEditHelper,
   categoryRemoveHelper,
-  getActiveCategory
+  getActiveCategory,
+  categoryDeleteHelper
 };

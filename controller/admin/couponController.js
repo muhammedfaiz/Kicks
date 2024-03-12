@@ -23,7 +23,9 @@ const couponAdd = async (req, res) => {
 
 const couponList = async (req, res) => {
   try {
-    const coupons = await couponHelper.couponListHelper();
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 5;
+    const coupons = await couponHelper.couponListHelper(page,pageSize);
     for (const coupon of coupons) {
       coupon.expiry = moment(coupon.expiration).format("DD-MMM-YYYY");
     }
@@ -72,11 +74,22 @@ const changeCouponStatus=async(req,res)=>{
     }
 }
 
+const couponDelete = async(req,res)=>{
+  try {
+    const id = req.params.id;
+    const result = await couponHelper.deleteCoupon(id);
+    res.json({status:result});
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   couponAddLoad,
   couponAdd,
   couponList,
   couponEditLoad,
   couponEdit,
-  changeCouponStatus
+  changeCouponStatus,
+  couponDelete
 };

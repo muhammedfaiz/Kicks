@@ -27,12 +27,15 @@ const offerAddHelper = (data) => {
   });
 };
 
-const getAllOffer = () => {
+const getAllOffer = (page, pageSize) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const skip = (page - 1) * pageSize;
       const offers = await Offer.find()
         .populate("productOffer.product")
-        .populate("categoryOffer.category");
+        .populate("categoryOffer.category")
+        .skip(skip)
+        .limit(pageSize);
       resolve(offers);
     } catch (error) {
       console.log(error);
@@ -215,6 +218,21 @@ const offerFind = (products) => {
   });
 };
 
+const deleteOfferHelper = (id)=>{
+  return new Promise(async(resolve, reject) => { 
+    try {
+      const deleteOffer = await  Offer.deleteOne({_id: id});
+      if(deleteOffer){
+        resolve(true)
+      }else{
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+   })
+}
+
 module.exports = {
   offerAddHelper,
   getAllOffer,
@@ -225,4 +243,5 @@ module.exports = {
   getproductOffer,
   getCategoryOffer,
   offerFind,
+  deleteOfferHelper
 };

@@ -289,8 +289,8 @@
                                                                 <th>type</th>
                                                             </tr>
 
-                                                            <tr>
-                                                                <% wallet.details.forEach(detail=> { %>
+                                                            <% wallet.details.forEach(detail=> { %>
+                                                                <tr>
                                                                     <td>
                                                                         #<%= detail.transactionId %>
                                                                     </td>
@@ -303,9 +303,9 @@
                                                                     <td class="text-success">
                                                                         <%= detail.type %>
                                                                     </td>
+                                                                </tr>
                                                                     <% }) %>
 
-                                                            </tr>
                                                         </table>
                                                     </div>
                                                 </div>

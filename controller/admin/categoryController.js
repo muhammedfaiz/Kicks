@@ -3,7 +3,9 @@ const categoryHelper = require("../../helpers/categoryHelper");
 // categoryList
 const categoryList = async (req, res) => {
   try {
-    const result = await categoryHelper.categoryLoadHelper();
+    const page = parseInt(req.query.page)||1;
+    const pageSize = 5;
+    const result = await categoryHelper.categoryLoadHelper(page,pageSize);
     if (result) {
       res.render("backend/categoryList", { categories: result });
     }
@@ -76,6 +78,16 @@ const categoryRemove = async (req, res) => {
   }
 };
 
+const categoryDelete = async(req,res)=>{
+  try {
+    const id = req.params.id;
+    const result = await categoryHelper.categoryDeleteHelper(id);
+    res.json({status:result});
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   categoryList,
   categoryAddLoad,
@@ -83,4 +95,5 @@ module.exports = {
   categoryEditLoad,
   categoryEdit,
   categoryRemove,
+  categoryDelete
 };

@@ -1,166 +1,179 @@
 <%- include('../layout/headerBack.ejs') %>
-    <section class="content-main">
-        <div class="content-header">
-            <div>
-                <h2 class="content-title card-title">Sales Report </h2>
+<section class="content-main">
+  <div class="content-header">
+    <div>
+      <h2 class="content-title card-title">Sales Report</h2>
+    </div>
+    <div>
+      <button class="btn btn-primary" onclick="getPdf()">Download PDF</button>
+      <button class="btn btn-primary" onclick="getExcel()">
+        Download Excel
+      </button>
+    </div>
+  </div>
+  <div id="sales-report">
+    <div class="card mb-4">
+      <header class="card-header">
+        <form action="/admin/sales-report" method="get">
+          <div class="row gx-3">
+            <div class="col-lg-2 col-6 col-md-3">
+              <label for="startDate" class="text-center mb-2 ms-2"
+                >Start Date</label
+              >
+              <input
+                type="date"
+                placeholder="Start Date"
+                class="form-control"
+                id="startDate"
+                name="startDate"
+              />
             </div>
-            <div>
-                <button class="btn btn-primary" onclick="getPdf()">Download PDF</button>
-                <button class="btn btn-primary" onclick="getExcel()">Download Excel</button>
+            <div class="col-lg-2 col-6 col-md-3">
+              <label for="endDate" class="text-center mb-2 ms-2"
+                >End Date</label
+              >
+              <input
+                type="date"
+                placeholder="End Date"
+                class="form-control"
+                id="endDate"
+                name="endDate"
+              />
             </div>
-        </div>
-        <div id="sales-report">
-            <div class="card mb-4">
-                <header class="card-header">
-                    <form action="/admin/sales-report" method="get">
-                        <div class="row gx-3">
-                            <div class="col-lg-2 col-6 col-md-3">
-                                <label for="startDate" class="text-center mb-2 ms-2">Start Date</label>
-                                <input type="date" placeholder="Start Date" class="form-control" id="startDate"
-                                    name="startDate">
-                            </div>
-                            <div class="col-lg-2 col-6 col-md-3 ">
-                                <label for="endDate" class="text-center mb-2 ms-2">End Date</label>
-                                <input type="date" placeholder="End Date" class="form-control" id="endDate"
-                                    name="endDate">
-                            </div>
-                            <div class="col-lg-2 col-6 col-md-3 mt-4">
-                                <button class="btn btn-primary text-light" type="submit">Filter</button>
-                            </div>
-                        </div>
-                    </form>
-                </header> <!-- card-header end// -->
-                <% if (salesData!=='undefined' ) { %>
-
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th scope="col">Product</th>
-                                        <th scope="col">Quantity</th>
-                                        <th scope="col">Revenue</th>
-                                        <th scope="col">Discount</th>
-                                        <th scope="col"> Coupons </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% salesData.forEach(order=> { %>
-
-                                        <tr>
-                                            <td>
-                                                <%= order.orderedDate %>
-                                            </td>
-                                            <td><b>
-                                                    <% order.items.forEach(product=> { %>
-                                                        <%= product.product.name %>, &nbsp; &nbsp;
-                                                            <% }) %>
-                                                </b></td>
-                                            <td>
-                                                <% order.items.forEach(product=> { %>
-                                                    <%= product.quantity %> nos, &nbsp; &nbsp;
-                                                        <% }) %>
-                                            </td>
-                                            <td>
-                                                <%= order.allTotal %>
-                                            </td>
-                                            <td>
-                                                <% order.items.forEach(product=> { %>
-                                                    <%= product.discount %>%,&nbsp;&nbsp;
-                                                        <% }); %>
-                                            </td>
-                                            <td>
-                                                <%= order.coupon %>
-                                            </td>
-
-                                        </tr>
-                                        <% }) %>
-
-                                </tbody>
-                            </table>
-                        </div> <!-- table-responsive //end -->
-                    </div> <!-- card-body end// -->
-                    <% } else { %>
-                        <div class="card-body">
-                            No Orders Yet!!
-                        </div>
-                        <% } %>
-            </div> <!-- card end// -->
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Overall Revenue</h4>
-                        </div>
-                        <div class="card-body">
-                            <h6>Total Revenue: <%= totalRevenue%>
-                            </h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Total Sales</h4>
-                        </div>
-                        <div class="card-body">
-                            <h6>Total Sale: <%= saleCount%>
-                            </h6>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-lg-2 col-6 col-md-3 mt-4">
+              <button class="btn btn-primary text-light" type="submit">
+                Filter
+              </button>
             </div>
+          </div>
+        </form>
+      </header>
+      <!-- card-header end// -->
+      <% if (salesData!=='undefined' ) { %>
+
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th scope="col">Product</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Revenue</th>
+                <th scope="col">Discount</th>
+                <th scope="col">Coupons</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% salesData.forEach(order=> { %>
+
+              <tr>
+                <td><%= order.orderedDate %></td>
+                <td>
+                  <b>
+                    <% order.items.forEach(product=> { %> <%=
+                    product.product.name %>, &nbsp; &nbsp; <% }) %>
+                  </b>
+                </td>
+                <td>
+                  <% order.items.forEach(product=> { %> <%= product.quantity %>
+                  nos, &nbsp; &nbsp; <% }) %>
+                </td>
+                <td><%= order.allTotal %></td>
+                <td>
+                  <% order.items.forEach(product=> { %> <%= product.discount
+                  %>%,&nbsp;&nbsp; <% }); %>
+                </td>
+                <td><%= order.coupon %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
         </div>
-
-        <div class="pagination-area mt-15 mb-50">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-start">
-                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                    <li class="page-item"><a class="page-link" href="#">02</a></li>
-                    <li class="page-item"><a class="page-link" href="#">03</a></li>
-                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                    <li class="page-item"><a class="page-link" href="#">16</a></li>
-                    <li class="page-item"><a class="page-link" href="#"><i
-                                class="material-icons md-chevron_right"></i></a></li>
-                </ul>
-            </nav>
+        <!-- table-responsive //end -->
+      </div>
+      <!-- card-body end// -->
+      <% } else { %>
+      <div class="card-body">No Orders Yet!!</div>
+      <% } %>
+    </div>
+    <!-- card end// -->
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <h4>Overall Revenue</h4>
+          </div>
+          <div class="card-body">
+            <h6>Total Revenue: <%= totalRevenue%></h6>
+          </div>
         </div>
-    </section>
+      </div>
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <h4>Total Sales</h4>
+          </div>
+          <div class="card-body">
+            <h6>Total Sale: <%= saleCount%></h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        const currentDate = new Date();
-        currentDate.setHours(23, 59, 59);
-        const currentDateISO = currentDate.toISOString().split('T')[0];
-        // Set the max attribute of the endDate input to the current date
-        document.getElementById('endDate').setAttribute('max', currentDateISO);
-        document.getElementById('startDate').setAttribute('max', currentDateISO);
+  <div class="pagination-area mt-15 mb-50">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-start">
+        <li class="page-item"><a class="page-link" href="?page=1">01</a></li>
+        <li class="page-item"><a class="page-link" href="?page=2">02</a></li>
+        <li class="page-item"><a class="page-link" href="?page=3">03</a></li>
+        <li class="page-item"><a class="page-link" href="?page=4">04</a></li>
+        <li class="page-item"><a class="page-link" href="?page=5">05</a></li>
+      </ul>
+    </nav>
+  </div>
+</section>
 
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
+<script>
+  document.getElementById("startDate").addEventListener("change", function () {
+    var startDate = document.getElementById("startDate").value;
+    document.getElementById("endDate").setAttribute("min", startDate);
+  });
+  const currentDate = new Date();
+  currentDate.setHours(23, 59, 59);
+  const currentDateISO = currentDate.toISOString().split("T")[0];
+  // Set the max attribute of the endDate input to the current date
+  document.getElementById("endDate").setAttribute("max", currentDateISO);
+  document.getElementById("startDate").setAttribute("max", currentDateISO);
 
-        // Set date values based on URL parameters
-        document.getElementById('startDate').value = getUrlParameter('startDate');
-        document.getElementById('endDate').value = getUrlParameter('endDate');
+  function getUrlParameter(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+    var results = regex.exec(location.search);
+    return results === null
+      ? ""
+      : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
 
-        function getPdf() {
-            let element = document.getElementById('sales-report');
-            let filename = 'sales-report-' + new Date().toISOString() + '.pdf';
-            let options = {
-                filename: filename
-            }
-            html2pdf(element, options);
-        }
+  // Set date values based on URL parameters
+  document.getElementById("startDate").value = getUrlParameter("startDate");
+  document.getElementById("endDate").value = getUrlParameter("endDate");
 
-        function getExcel() {
-            let element = document.getElementById('sales-report');
-            const wb = XLSX.utils.table_to_book(element);
-            let filename = 'sales-report-' + new Date().toISOString() + '.xlsx';
-            XLSX.writeFile(wb, filename);
-        }
-    </script>
-    <%- include('../layout/footerBack.ejs') %>
+  function getPdf() {
+    let element = document.getElementById("sales-report");
+    let filename = "sales-report-" + new Date().toISOString() + ".pdf";
+    let options = {
+      filename: filename,
+    };
+    html2pdf(element, options);
+  }
+
+  function getExcel() {
+    let element = document.getElementById("sales-report");
+    const wb = XLSX.utils.table_to_book(element);
+    let filename = "sales-report-" + new Date().toISOString() + ".xlsx";
+    XLSX.writeFile(wb, filename);
+  }
+</script>
+<%- include('../layout/footerBack.ejs') %>

@@ -4,7 +4,9 @@ const Category = require("../../models/categoryModel");
 // productlist
 const productList = async (req, res) => {
   try {
-    const products = await productHelper.productListHelper();
+    const page = parseInt(req.query.page)||1;
+    const pageSize = 5;
+    const products = await productHelper.productListHelper(page,pageSize);
     res.render("backend/productList", { products: products });
   } catch (error) {
     console.log(error);
@@ -51,7 +53,7 @@ const productStatusHandle = async (req, res) => {
 // product editing handler
 const productEditHandler = async (req, res) => {
   try {
-    const result = await Product.findById(req.params.id);
+    const result = await Product.findById(req.params.id).populate("category");
     const categories = await Category.find({});
     res.render("backend/productEdit", {
       product: result,

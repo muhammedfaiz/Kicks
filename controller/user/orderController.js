@@ -83,9 +83,13 @@ const getOrderDetails = async (req, res) => {
     orders.orderTotal = productHelper.currencyFormatter(
       Math.round(orders.total)
     );
+    console.log
+    orders.oldTotal = productHelper.currencyFormatter(Math.round(orders.originalTotal));
+    orders.couponDiscountAmount = productHelper.currencyFormatter(orders.couponDiscount);
     for (const item of orders.items) {
       item.offerPrice = productHelper.currencyFormatter(Math.round(item.price));
     }
+
     await orderHelper.generateInvoice(orders);
     if (orders) {
       res.render("frontend/orderDetails", { data: orders, user: userId });

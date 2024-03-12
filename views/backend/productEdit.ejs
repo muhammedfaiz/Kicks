@@ -1,136 +1,236 @@
 <%- include('../layout/headerBack.ejs')%>
-        <section class="content-main">
-            <form action="/admin/product-edit/<%= product._id%>?_method=PUT" method="post" enctype="multipart/form-data" onsubmit="return productValidation(event)">
-                <input type="hidden" name="_method" value="PUT">
-                <div class="row">
-                    <div class="col-9">
-                        <div class="content-header">
-                            <h2 class="content-title">Edit Product</h2>
-                        </div>
-                        <% if(data!=='undefined'){%>
-                            <div class="success text-success mb-4 mx-2">
-                                <p><%= data%></p>
-                            </div>
-                            <%}%>
-                            <div class="error text-danger mb-4 mx-2" id="error"></div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h4>Basic</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-4">
-                                    <label for="product_name" class="form-label">Product Name</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name="name" value="<%= product.name%>">
-                                    <span id="error-prod_name" class="text-danger m-3"></span>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="brand_name" class="form-label">Brand Name</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="brand_name" name="brandName" value="<%= product.brandName%>">
-                                    <span id="error-brand_name" class="text-danger m-3"></span>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="form-label">Full description</label>
-                                    <textarea placeholder="Type here" class="form-control" rows="4" name="description" id="description"><%= product.description%></textarea>
-                                    <span id="error-description" class="text-danger m-3"></span>
-                                </div>
-                                <div class="row">
-                                    <div class="col-lg-4">
-                                        <div class="mb-4">
-                                            <label class="form-label">Price</label>
-                                            <div class="row gx-2">
-                                                <input placeholder="$" type="text" class="form-control" name="price" value="<%= product.price%>">
-                                                <span id="error-price" class="text-danger m-3"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="mb-4">
-                                            <label class="form-label">Discount</label>
-                                            <input placeholder="$" type="text" class="form-control" name="discount" value="<%= product.discount%>">
-                                            <span id="error-discount" class="text-danger m-3"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-lg-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Small Quantity</label>
-                                            <input type="text" class="form-control" name="smallQuantity" value="<%= product.stock[0].quantity%>">
-                                            <span id="error-sm" class="text-danger m-3"></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Medium Quantity</label>
-                                            <input type="text" class="form-control" name="mediumQuantity" value="<%= product.stock[1].quantity%>">
-                                            <span id="error-md" class="text-danger m-3"></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Large Quantity</label>
-                                            <input type="text" class="form-control" name="largeQuantity" value="<%= product.stock[2].quantity%>">
-                                            <span id="error-lg" class="text-danger m-3"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        </div> <!-- card end// -->
-
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h4>Media</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="input-upload">
-                                    <img src="/uploads/<%= product.images[0].data%>" alt="" id="preview-img1">
-                                    <input class="form-control" type="file" name="images" accept="/*" id="image1" >
-                                </div>
-                                <div class="input-upload">
-                                    <img src="/uploads/<%= product.images[1].data%>" alt="" id="preview-img2">
-                                    <input class="form-control" type="file" name="images" accept="/*" id="image2">
-                                </div>
-                                <div class="input-upload">
-                                    <img src="/uploads/<%= product.images[2].data%>" alt="" id="preview-img3">
-                                    <input class="form-control" type="file" name="images" accept="/*" id="image3">
-                                </div>
-                                <div class="input-upload">
-                                    <img src="/uploads/<%= product.images[3].data%>" alt="" id="preview-img4">
-                                    <input class="form-control" type="file" name="images" accept="/*" id="image4">
-                                </div>
-                            </div>
-                        </div>
-            
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h4>Organization</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gx-2">
-                                    <div class="col-sm-12 mb-3">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-select" name="category">
-                                            <% if(categories !== undefined){
-                                                categories.forEach((category) => { %>
-                                            <option value="<%= category._id%>"> <%= category.name%> </option>
-                                           
-                                            <%})}%>
-                                        </select>
-                                    </div>
-                                </div> <!-- row.// -->
-                            </div>
-                        </div><!-- card end// -->
-                    </div>
-                    <div class="mb-4">
-                        <button type="submit" class="btn btn-md rounded font-sm hover-up">Edit</button>
-                    </div>
+<section class="content-main">
+  <form
+    action="/admin/product-edit/<%= product._id%>?_method=PUT"
+    method="post"
+    enctype="multipart/form-data"
+    onsubmit="return productValidation(event)"
+  >
+    <input type="hidden" name="_method" value="PUT" />
+    <div class="row">
+      <div class="col-9">
+        <div class="content-header">
+          <h2 class="content-title">Edit Product</h2>
+        </div>
+        <% if(data!=='undefined'){%>
+        <div class="success text-success mb-4 mx-2">
+          <p><%= data%></p>
+        </div>
+        <%}%>
+        <div class="error text-danger mb-4 mx-2" id="error"></div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Basic</h4>
+          </div>
+          <div class="card-body">
+            <div class="mb-4">
+              <label for="product_name" class="form-label">Product Name</label>
+              <input
+                type="text"
+                placeholder="Type here"
+                class="form-control"
+                id="product_name"
+                name="name"
+                value="<%= product.name%>"
+              />
+              <span id="error-prod_name" class="text-danger m-3"></span>
+            </div>
+            <div class="mb-4">
+              <label for="brand_name" class="form-label">Brand Name</label>
+              <input
+                type="text"
+                placeholder="Type here"
+                class="form-control"
+                id="brand_name"
+                name="brandName"
+                value="<%= product.brandName%>"
+              />
+              <span id="error-brand_name" class="text-danger m-3"></span>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Full description</label>
+              <textarea
+                placeholder="Type here"
+                class="form-control"
+                rows="4"
+                name="description"
+                id="description"
+              >
+<%= product.description%></textarea
+              >
+              <span id="error-description" class="text-danger m-3"></span>
+            </div>
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Price</label>
+                  <div class="row gx-2">
+                    <input
+                      placeholder="$"
+                      type="text"
+                      class="form-control"
+                      name="price"
+                      value="<%= product.price%>"
+                    />
+                    <span id="error-price" class="text-danger m-3"></span>
+                  </div>
                 </div>
-            </form>
-        </section> <!-- content-main end// -->
-        <%- include('../layout/footerBack.ejs')%>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Discount</label>
+                  <input
+                    placeholder="$"
+                    type="text"
+                    class="form-control"
+                    name="discount"
+                    value="<%= product.discount%>"
+                  />
+                  <span id="error-discount" class="text-danger m-3"></span>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="mb-3">
+                  <label class="form-label">Small Quantity</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="smallQuantity"
+                    value="<%= product.stock[0].quantity%>"
+                  />
+                  <span id="error-sm" class="text-danger m-3"></span>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-3">
+                  <label class="form-label">Medium Quantity</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="mediumQuantity"
+                    value="<%= product.stock[1].quantity%>"
+                  />
+                  <span id="error-md" class="text-danger m-3"></span>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-3">
+                  <label class="form-label">Large Quantity</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="largeQuantity"
+                    value="<%= product.stock[2].quantity%>"
+                  />
+                  <span id="error-lg" class="text-danger m-3"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- card end// -->
+      </div>
+      <div class="col-lg-3">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Media</h4>
+          </div>
+          <div class="card-body">
+            <div class="input-upload">
+              <img
+                src="/uploads/<%= product.images[0].data%>"
+                alt=""
+                id="preview-img1"
+              />
+              <input
+                class="form-control"
+                type="file"
+                name="images"
+                accept="/*"
+                id="image1"
+              />
+            </div>
+            <div class="input-upload">
+              <img
+                src="/uploads/<%= product.images[1].data%>"
+                alt=""
+                id="preview-img2"
+              />
+              <input
+                class="form-control"
+                type="file"
+                name="images"
+                accept="/*"
+                id="image2"
+              />
+            </div>
+            <div class="input-upload">
+              <img
+                src="/uploads/<%= product.images[2].data%>"
+                alt=""
+                id="preview-img3"
+              />
+              <input
+                class="form-control"
+                type="file"
+                name="images"
+                accept="/*"
+                id="image3"
+              />
+            </div>
+            <div class="input-upload">
+              <img
+                src="/uploads/<%= product.images[3].data%>"
+                alt=""
+                id="preview-img4"
+              />
+              <input
+                class="form-control"
+                type="file"
+                name="images"
+                accept="/*"
+                id="image4"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Organization</h4>
+          </div>
+          <div class="card-body">
+            <div class="row gx-2">
+              <div class="col-sm-12 mb-3">
+                <label class="form-label">Category</label>
+                <select class="form-select" name="category">
+                  <option value="<%= product.category._id %>" selected>
+                    <%= product.category.name %>
+                  </option>
+                  <% if(categories !== undefined){ categories.forEach(function(category) { %>
+                  <option value="<%= category._id%>">
+                    <%= category.name%>
+                  </option>
+                  <%})}%>
+                </select>
+              </div>
+            </div>
+            <!-- row.// -->
+          </div>
+        </div>
+        <!-- card end// -->
+      </div>
+      <div class="mb-4">
+        <button type="submit" class="btn btn-md rounded font-sm hover-up">
+          Edit
+        </button>
+      </div>
+    </div>
+  </form>
+</section>
+<!-- content-main end// -->
+<%- include('../layout/footerBack.ejs')%>

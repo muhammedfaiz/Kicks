@@ -55,6 +55,8 @@ const placeOrderHelper = (data, userId, status) => {
           paymentMethod: data.payment,
           total: cart.total,
           coupon: cart.coupon,
+          couponDiscount: cart.couponDiscount,
+          originalTotal: cart.originalTotal,
           status: status,
         });
         resolve(order);
@@ -116,22 +118,22 @@ const orderCancelHelper = (orderId, itemId, userId) => {
 
     if (order[0].paymentMethod === "razorpay") {
       const user = await User.findById(userId);
+      let date = new Date();
       const updateWallet = await User.updateOne(
         { _id: new ObjectId(userId) },
         {
           $set: {
-            wallet: {
-              balance: user.wallet.balance + Math.round(order[0].total),
-              details: [
-                {
-                  type: "refund",
-                  amount: Math.round(order[0].total),
-                  date: new Date(),
-                },
-              ],
+            "wallet.balance": user.wallet.balance + Math.round(order[0].total),
+          },
+          $push: {
+            "wallet.details": {
+              type: "refund",
+              amount: Number(Math.round(order[0].total)),
+              date: date,
             },
           },
-        }
+        },
+        { upsert: true }
       );
     }
     const product = await Product.updateOne(
@@ -180,11 +182,15 @@ const orderReturnHelper = (orderId, itemId) => {
   });
 };
 
-const getAllOrders = () => {
+const getAllOrders = (page, pageSize) => {
   return new Promise(async (resolve, reject) => {
+    const skip = (page - 1) * pageSize;
     const result = await Order.find()
       .populate("items.product")
-      .populate("user");
+      .populate("user")
+      .sort({ orderedOn: -1 })
+      .skip(skip)
+      .limit(pageSize);
     resolve(result);
   });
 };
@@ -196,10 +202,13 @@ const changeOrderStatusHelper = (orderId, itemId, data) => {
       { $set: { "items.$.status": data.status } }
     );
     const order = await Order.findById(orderId);
-    const allItemstatus = order.items.every(
+    const hasDeliveredItem = order.items.some(
       (item) => item.status === "Delivered"
     );
-    if (allItemstatus) {
+    const allOtherItemsValid = order.items.every(
+      (item) => item.status !== "Pending" && item.status !== "Shipped"
+    );
+    if (hasDeliveredItem && allOtherItemsValid) {
       order.status = "Delivered";
       order.save();
     }
@@ -253,9 +262,10 @@ const verifyPaymentHelper = (data) => {
   });
 };
 
-const getAllReturns = () => {
+const getAllReturns = (page, pageSize) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const skip = (page - 1) * pageSize;
       const result = await Order.aggregate([
         { $unwind: "$items" },
         {
@@ -267,6 +277,8 @@ const getAllReturns = () => {
           },
         },
         { $match: { "items.status": "Return" } },
+        { $skip: skip },
+        { $limit: pageSize },
       ]);
       resolve(result);
     } catch (error) {
@@ -326,17 +338,27 @@ const generateInvoice = async (order) => {
   for (const item of order.items) {
     doc.text(item.product.name, 50, yPosition);
     doc.text(item.quantity.toString(), 200, yPosition);
-    doc.text(`${Math.round(item.price)}`, 300, yPosition);
+    doc.text(`Rs.${Math.round(item.price)}`, 300, yPosition);
     yPosition += 20; // Adjust this value based on your layout
   }
+  if (order.coupon) {
+    doc
+      .moveDown()
+      .fontSize(16)
+      .font("Helvetica-Bold")
+      .text(`Original Total: Rs.${order.originalTotal}`, 200, yPosition + 20);
+    doc.text(`Coupon Discount: Rs.${order.couponDiscount}`, 200, yPosition + 40);
+    doc.text(`Current Total: Rs.${order.total}`, 200, yPosition + 60);
+    yPosition += 80;
+  } else {
+    doc
+      .moveDown()
+      .fontSize(16)
+      .font("Helvetica-Bold")
+      .text(`Total:${order.total}`, 260, yPosition);
 
-  doc
-    .moveDown()
-    .fontSize(16)
-    .font("Helvetica-Bold")
-    .text(`Total:${order.total}`, 260, yPosition);
-
-  yPosition += 40;
+    yPosition += 40;
+  }
   // Add company and client information
   doc.moveDown().fontSize(12).text("Company: Kicks", 50, yPosition);
   doc.text("Address: Kanjirapuzha, Mannarkkad, India");

@@ -1,8 +1,9 @@
 const Order = require("../models/orderModel");
 
-const getSalesData = (startDate, endDate) => {
+const getSalesData = (startDate, endDate, page, pageSize) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const skip = (page - 1) * pageSize;
       if (startDate && endDate) {
         const startOfDay = new Date(startDate);
         startOfDay.setHours(0, 0, 0);
@@ -14,7 +15,9 @@ const getSalesData = (startDate, endDate) => {
           orderedOn: { $gte: startOfDay, $lte: endOfDay },
         })
           .populate("items.product")
-          .sort({ orderedOn: -1 });
+          .sort({ orderedOn: -1 })
+          .skip(skip)
+          .limit(pageSize);
         const salesSummary = await Order.aggregate([
           {
             $match: {
@@ -34,7 +37,9 @@ const getSalesData = (startDate, endDate) => {
       } else {
         const orders = await Order.find({ status: "Delivered" })
           .populate("items.product")
-          .sort({ orderedOn: -1 });
+          .sort({ orderedOn: -1 })
+          .skip(skip)
+          .limit(pageSize);
         const salesSummary = await Order.aggregate([
           {
             $match: {
@@ -73,7 +78,7 @@ const getChartDataPerMonth = () => {
         },
         {
           $group: {
-            _id: { month: { $month: "$orderedOn" } }, 
+            _id: { month: { $month: "$orderedOn" } },
             totalOrders: { $sum: 1 },
           },
         },
@@ -136,11 +141,10 @@ const getChartDataPerYear = () => {
           },
         },
         {
-          $sort: { year: 1 }, 
+          $sort: { year: 1 },
         },
       ]);
 
-     
       const ordersPerYear = data.map((item) => {
         return {
           totalOrders: item.totalOrders,

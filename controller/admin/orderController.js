@@ -5,7 +5,9 @@ const moment = require("moment");
 // Gets all orders
 const orderList = async (req, res) => {
   try {
-    const orders = await orderHelper.getAllOrders();
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 5;
+    const orders = await orderHelper.getAllOrders(page,pageSize);
     for (let order of orders) {
       order.allTotal = productHelper.currencyFormatter(
         Math.round(order.total)
@@ -57,7 +59,9 @@ const changeOrderStatus = async (req, res) => {
 
 const returnOrdersList = async(req,res)=>{
   try {
-    const orders = await orderHelper.getAllReturns();
+    const page = parseInt(req.query.page)||1;
+    const pageSize = 5;
+    const orders = await orderHelper.getAllReturns(page,pageSize);
     for (const order of orders) {
       order.orderedDate = moment(order.orderedOn).format("DD-MM-YYYY");
     }

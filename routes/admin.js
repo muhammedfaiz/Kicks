@@ -73,6 +73,8 @@ router.put("/category-edit/:id", categoryController.categoryEdit);
 
 router.patch("/category-remove/:id", categoryController.categoryRemove);
 
+router.delete("/category-delete/:id", categoryController.categoryDelete);
+
 router.get("/user-list", middleware.isLogin, userController.userList);
 
 router.patch("/user-status/:id", userController.userStatus);
@@ -85,7 +87,7 @@ router.get(
   orderController.returnOrdersList
 );
 
-router.patch('/order-returned/:orderId/:itemId',orderController.orderReturned)
+router.patch("/order-returned/:orderId/:itemId", orderController.orderReturned);
 
 router.get(
   "/order-details/:orderId",
@@ -114,6 +116,8 @@ router.put("/coupon-edit/:id", couponController.couponEdit);
 
 router.patch("/coupon-status/:id", couponController.changeCouponStatus);
 
+router.delete("/coupon-delete/:id",couponController.couponDelete);
+
 router.get("/offer-add", middleware.isLogin, offerController.offerAddLoad);
 
 router.post("/offer-add", offerController.offerAdd);
@@ -135,6 +139,8 @@ router.get(
   middleware.isLogin,
   salesReportController.generateSalesReport
 );
+
+router.delete("/offer-delete/:id", offerController.deleteOffer);
 
 router.get("/chart-data", salesReportController.getSalesData);
 

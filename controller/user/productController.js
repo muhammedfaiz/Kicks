@@ -91,14 +91,19 @@ const addToCart = async (req, res) => {
 
 const shopView = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 5;
     const userId = req.session.userId;
     const category = req.query.category;
     const minPrice = req.query.minPrice;
     const maxPrice = req.query.maxPrice;
-    const currentDate = new Date();
     let count = 0;
     if (category && !minPrice && !maxPrice) {
-      const products = await productHelper.shopViewHeleper(category);
+      const products = await productHelper.shopViewHeleper(
+        category,
+        page,
+        pageSize
+      );
       const categories = await categoryHelper.getActiveCategory();
       const offerProducts = await offerHelper.offerFind(products);
       let count = 0;
@@ -112,7 +117,11 @@ const shopView = async (req, res) => {
         categories,
       });
     } else if (category && minPrice && maxPrice) {
-      const productData = await productHelper.shopViewHeleper(category);
+      const productData = await productHelper.shopViewHeleper(
+        category,
+        page,
+        pageSize
+      );
       const categories = await categoryHelper.getActiveCategory();
       const offerProducts = await offerHelper.offerFind(productData);
       let products = [];
@@ -134,7 +143,11 @@ const shopView = async (req, res) => {
         categories,
       });
     } else if (minPrice && maxPrice && !category) {
-      const productData = await productHelper.shopViewHeleper();
+      const productData = await productHelper.shopViewHeleper(
+        null,
+        page,
+        pageSize
+      );
       const categories = await categoryHelper.getActiveCategory();
       const offerProducts = await offerHelper.offerFind(productData);
       let products = [];
@@ -156,10 +169,13 @@ const shopView = async (req, res) => {
         categories,
       });
     } else {
-      const products = await productHelper.shopViewHeleper();
+      const products = await productHelper.shopViewHeleper(
+        null,
+        page,
+        pageSize
+      );
       const categories = await categoryHelper.getActiveCategory();
       const offerProducts = await offerHelper.offerFind(products);
-      console.log(offerProducts);
       for (const product of offerProducts) {
         count++;
       }

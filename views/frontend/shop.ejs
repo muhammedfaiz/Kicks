@@ -1,157 +1,217 @@
 <%- include("../layout/header.ejs") %>
-    <main class="main">
-        <div class="page-header breadcrumb-wrap">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="index.html" rel="nofollow">Home</a>
-                    <span></span> Shop
-                </div>
+<main class="main">
+  <div class="page-header breadcrumb-wrap">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html" rel="nofollow">Home</a>
+        <span></span> Shop
+      </div>
+    </div>
+  </div>
+  <section class="mt-50 mb-50">
+    <div class="container">
+      <div class="row flex-row-reverse">
+        <div class="col-lg-9">
+          <div class="shop-product-fillter">
+            <div class="totall-product">
+              <p>
+                We found
+                <strong class="text-brand"> <%= count %> </strong> items for
+                you!
+              </p>
             </div>
+          </div>
+          <div class="row product-grid-3">
+            <% if (products!=='undefined' && products.length>0) { %> <%
+            products.forEach(product=> { %>
+            <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+              <div class="product-cart-wrap mb-30">
+                <div class="product-img-action-wrap">
+                  <div class="product-img product-img-zoom">
+                    <a href="/product-view/<%= product._id %>">
+                      <img
+                        class="default-img"
+                        src="/uploads/<%= product.images[0].data %>"
+                        alt=""
+                      />
+                      <img
+                        class="hover-img"
+                        src="/uploads/<%= product.images[1].data %>"
+                        alt=""
+                      />
+                    </a>
+                  </div>
+                  <div
+                    class="product-badges product-badges-position product-badges-mrg"
+                  >
+                    <span class="hot">Hot</span>
+                  </div>
+                </div>
+                <div class="product-content-wrap">
+                  <div class="product-category">
+                    <a href="/product-view/<%= product._id %>">
+                      <%= product.category.name %>
+                    </a>
+                  </div>
+                  <h2>
+                    <a href="/product-view/<%= product._id %>">
+                      <%= product.name %>
+                    </a>
+                  </h2>
+                  <div class="rating-result" title="90%">
+                    <span>
+                      <span>90%</span>
+                    </span>
+                  </div>
+                  <div class="product-price">
+                    <span> <%= product.offerPrice %> </span>
+                    <span class="old-price"> <%= product.price %> </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% }) %> <% } else { %>
+            <h4 class="text-dark">No products Yet!!</h4>
+            <% } %>
+          </div>
+          <!--pagination-->
+          <div class="pagination-area mt-15 mb-50">
+            <nav aria-label="Page navigation example">
+              <ul class="pagination justify-content-start">
+                <li class="page-item">
+                  <a class="page-link" href="?page=1">01</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page=2">02</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page=3">03</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page=4">04</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page=5">05</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
-        <section class="mt-50 mb-50">
-            <div class="container">
-                <div class="row flex-row-reverse">
-                    <div class="col-lg-9">
-                        <div class="shop-product-fillter">
-                            <div class="totall-product">
-                                <p> We found <strong class="text-brand">
-                                        <%= count %>
-                                    </strong> items for you!</p>
-                            </div>
-                        </div>
-                        <div class="row product-grid-3">
-                            <% if (products!=='undefined' && products.length>0) { %>
-                                <% products.forEach(product=> { %>
-                                    <div class="col-lg-4 col-md-4 col-12 col-sm-6">
-                                        <div class="product-cart-wrap mb-30">
-                                            <div class="product-img-action-wrap">
-                                                <div class="product-img product-img-zoom">
-                                                    <a href="/product-view/<%= product._id %>">
-                                                        <img class="default-img"
-                                                            src="/uploads/<%= product.images[0].data %>" alt="">
-                                                        <img class="hover-img"
-                                                            src="/uploads/<%= product.images[1].data %>" alt="">
-                                                    </a>
-                                                </div>
-                                                <div class="product-badges product-badges-position product-badges-mrg">
-                                                    <span class="hot">Hot</span>
-                                                </div>
-                                            </div>
-                                            <div class="product-content-wrap">
-                                                <div class="product-category">
-                                                    <a href="/product-view/<%= product._id %>">
-                                                        <%= product.category.name %>
-                                                    </a>
-                                                </div>
-                                                <h2><a href="/product-view/<%= product._id %>">
-                                                        <%= product.name %>
-                                                    </a></h2>
-                                                <div class="rating-result" title="90%">
-                                                    <span>
-                                                        <span>90%</span>
-                                                    </span>
-                                                </div>
-                                                <div class="product-price">
-                                                    <span>
-                                                        <%= product.offerPrice %>
-                                                    </span>
-                                                    <span class="old-price">
-                                                        <%= product.price %>
-                                                    </span>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <% }) %>
-                                        <% } else { %>
-                                            <h4 class="text-dark">No products Yet!!</h4>
-                                            <% } %>
-
-                        </div>
-                        <!--pagination-->
-                        <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination justify-content-start">
-                                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">02</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">03</a></li>
-                                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">16</a></li>
-                                    <li class="page-item"><a class="page-link" href="#"><i
-                                                class="fi-rs-angle-double-small-right"></i></a></li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 primary-sidebar sticky-sidebar">
-                        <div class="widget-category mb-30">
-                            <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
-                            <ul class="categories">
-                                <% categories.forEach(category=> { %>
-                                    <li><a href="/shop?category=<%= category._id %>">
-                                            <%= category.name %>
-                                        </a></li>
-                                    <% }) %>
-                            </ul>
-                        </div>
-                        <!-- Fillter By Price -->
-                        <div class="sidebar-widget price_range range mb-30">
-                            <div class="widget-header position-relative mb-20 pb-10">
-                                <h5 class="widget-title mb-10">Fill by price</h5>
-                                <div class="bt-1 border-color-1"></div>
-                            </div>
-                            <div class="price-filter">
-                                <div class="price-filter-inner">
-
-                                    <div class="price_slider_amount">
-                                        <div class="label-input">
-                                            <span>Range:</span><input type="text" id="startPrice" name="min-price"
-                                                placeholder="min price" />
-                                            <input type="text" id="endPrice" name="max-price" placeholder="max price" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <a onclick="filterPrice()" class="btn btn-sm btn-default"><i class="fi-rs-filter mr-5"></i>
-                                Fillter</a>
-                        </div>
-                        <!-- Product sidebar Widget -->
-
-                        <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
-                            <img src="/user/imgs/banner/banner-11.jpg" alt="">
-                            <div class="banner-text">
-                                <span>Women Zone</span>
-                                <h4>Save 17% on <br>Office Dress</h4>
-                                <a href="shop-grid-right.html">Shop Now <i class="fi-rs-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-lg-3 primary-sidebar sticky-sidebar">
+          <div class="widget-category mb-30">
+            <h5 class="section-title style-1 mb-30 wow fadeIn animated">
+              Category
+            </h5>
+            <ul class="categories">
+              <% categories.forEach(category=> { %>
+              <li>
+                <a href="/shop?category=<%= category._id %>">
+                  <%= category.name %>
+                </a>
+              </li>
+              <% }) %>
+            </ul>
+          </div>
+          <!-- Fillter By Price -->
+          <div
+            class="sidebar-widget price_range range mb-30 text-center"
+            id="slide-div"
+          >
+            <div class="widget-header position-relative mb-20 pb-10">
+              <h5 class="widget-title mb-10">Filter by price</h5>
+              <div class="bt-1 border-color-1"></div>
             </div>
-        </section>
-    </main>
+            <div class="price-filter">
+              <div class="price-filter-inner">
+                <div class="price_slider_amount m-3" style="width: 100%"></div>
+                <div class="m-2">
+                  <input
+                    type="text"
+                    id="minAmount"
+                    readonly
+                    class="form-control"
+                  />
+                </div>
+                <div class="m-2">
+                  <input
+                    type="text"
+                    id="maxAmount"
+                    readonly
+                    class="form-control"
+                  />
+                </div>
+              </div>
+            </div>
+            <button id="filterButton" class="btn btn-sm btn-default m-3">
+              <i class="fi-rs-filter mr-5"></i> Filter
+            </button>
+          </div>
+          <!-- Product sidebar Widget -->
 
-    <script>
-        function filterPrice() {
-            const minPrice = $("#startPrice").val();
-            const maxPrice = $("#endPrice").val();
+          
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
 
-            // Get the query parameters as an object
-            const queryParams = {};
-            const searchParams = new URLSearchParams(window.location.search);
-            for (const [key, value] of searchParams.entries()) {
-                queryParams[key] = value;
-            }
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const priceSlider = document.querySelector(".price_slider_amount");
+    const minAmountInput = document.getElementById("minAmount");
+    const maxAmountInput = document.getElementById("maxAmount");
+    noUiSlider.create(priceSlider, {
+      start: [100, 500],
+      connect: true,
+      range: {
+        min: 0,
+        max: 10000,
+      },
+    });
 
-            queryParams.minPrice = minPrice;
-            queryParams.maxPrice = maxPrice;
-            if (queryParams.category) {
+    priceSlider.noUiSlider.on("update", function (values, handle) {
+      const minPrice = values[0];
+      const maxPrice = values[1];
+      minAmountInput.value = "Rs." + minPrice;
+      maxAmountInput.value = "Rs." + maxPrice;
+    });
 
-                location.href = `/shop?category=${queryParams.category}&minPrice=${queryParams.minPrice}&maxPrice=${queryParams.maxPrice}`;
-            } else {
-                location.href = `/shop?minPrice=${minPrice}&maxPrice=${maxPrice}`;
-            }
-        }
-    </script>
-    <%- include('../layout/footer.ejs') %>
+    const filterButton = document.getElementById("filterButton");
+    filterButton.addEventListener("click", function () {
+      const values = priceSlider.noUiSlider.get();
+      const minPrice = values[0];
+      const maxPrice = values[1];
+      filterPriceOfProduct(minPrice, maxPrice);
+    });
+
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.has("minPrice" && "maxPrice")) {
+      $("#slide-div")
+        .append(`<button id="removeFilterButton" class="btn btn-sm btn-default m-3">
+              <i class="fi-rs-filter mr-5"></i> Remove Filter
+            </button>`);
+    }
+    document
+      .getElementById("removeFilterButton")
+      .addEventListener("click", function () {
+        window.location.href = "/shop";
+      });
+  });
+
+  function filterPriceOfProduct(minPrice, maxPrice) {
+    const queryParams = {};
+    const searchParams = new URLSearchParams(window.location.search);
+    for (const [key, value] of searchParams.entries()) {
+      queryParams[key] = value;
+    }
+
+    queryParams.minPrice = minPrice;
+    queryParams.maxPrice = maxPrice;
+    if (queryParams.category) {
+      location.href = `/shop?category=${queryParams.category}&minPrice=${queryParams.minPrice}&maxPrice=${queryParams.maxPrice}`;
+    } else {
+      location.href = `/shop?minPrice=${minPrice}&maxPrice=${maxPrice}`;
+    }
+  }
+</script>
+<%- include('../layout/footer.ejs') %>

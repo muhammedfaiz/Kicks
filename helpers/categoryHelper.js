@@ -16,7 +16,7 @@ const categoryLoadHelper = (page, pageSize) => {
 const categoryAddHelper = (categoryData) => {
   return new Promise(async (resolve, reject) => {
     let response;
-    const result = await Category.find({ name: categoryData.categoryName });
+    const result = await Category.findOne({ name: categoryData.categoryName });
     if (!result) {
       const category = await Category.create({
         name: categoryData.categoryName,

@@ -290,10 +290,11 @@ const getAllReturns = (page, pageSize) => {
 const orderReturnedHelper = (orderId, itemId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const order = await Order.updateOne(
+      const order = await Order.findOneAndUpdate(
         { _id: orderId, "items._id": itemId },
         { $set: { "items.$.status": "Returned" } }
       );
+
       if (order.modifiedCount > 0) {
         resolve(true);
       }

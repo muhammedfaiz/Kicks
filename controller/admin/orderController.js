@@ -44,6 +44,9 @@ const changeOrderStatus = async (req, res) => {
   try {
     const orderId = req.params.orderId;
     const itemId = req.params.itemId;
+    if(req.body.status==="Returned"){
+      await orderHelper.orderReturnedHelper(orderId,itemId);
+    }
     const result = await orderHelper.changeOrderStatusHelper(
       orderId,
       itemId,

@@ -290,16 +290,56 @@ const getAllReturns = (page, pageSize) => {
 const orderReturnedHelper = (orderId, itemId) => {
   return new Promise(async (resolve, reject) => {
     try {
+      // Find and update the order
       const order = await Order.findOneAndUpdate(
         { _id: orderId, "items._id": itemId },
         { $set: { "items.$.status": "Returned" } }
       );
 
-      if (order.modifiedCount > 0) {
-        resolve(true);
+      // Ensure the order exists
+      if (!order) {
+        return reject(new Error("Order not found"));
       }
+
+      // Retrieve the user
+      const user = await User.findById(order.user);
+      if (!user) {
+        return reject(new Error("User not found"));
+      }
+
+      // Filter the item based on itemId
+      const item = order.items.filter((item) => item._id == itemId);
+
+      
+
+      // Ensure quantity is a valid number
+      const quantity = Number(item[0].quantity);
+      if (Number.isNaN(quantity) || quantity <= 0) {
+        return reject(new Error("Invalid quantity"));
+      }
+
+      // Ensure price is a valid number
+      const price = Number(item[0].price);
+      if (Number.isNaN(price) || price < 0) {
+        return reject(new Error("Invalid price"));
+      }
+
+      // Update user's wallet balance
+      user.wallet.balance = Number(user.wallet.balance) + price * quantity;
+      user.wallet.details.push({
+        type: "refund",
+        amount: price * quantity,
+        date: new Date(),
+      });
+
+      // Save the user with updated balance
+      await user.save();
+
+      // If the order was modified, resolve the promise
+      resolve(true);
     } catch (error) {
       console.log(error);
+      reject(error);
     }
   });
 };
@@ -348,7 +388,11 @@ const generateInvoice = async (order) => {
       .fontSize(16)
       .font("Helvetica-Bold")
       .text(`Original Total: Rs.${order.originalTotal}`, 200, yPosition + 20);
-    doc.text(`Coupon Discount: Rs.${order.couponDiscount}`, 200, yPosition + 40);
+    doc.text(
+      `Coupon Discount: Rs.${order.couponDiscount}`,
+      200,
+      yPosition + 40
+    );
     doc.text(`Current Total: Rs.${order.total}`, 200, yPosition + 60);
     yPosition += 80;
   } else {

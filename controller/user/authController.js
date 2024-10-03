@@ -176,7 +176,6 @@ const resetPassword = async (req, res) => {
       );
       if (verifyToken) {
         const { password, cpassword } = req.body;
-        console.log(password, cpassword);
         if (password === cpassword) {
           const updatePassword = await userHelper.resetPasswordHelper(
             user._id,

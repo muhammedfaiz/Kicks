@@ -97,7 +97,7 @@ Kicks/
 
 ### Demo
 
-[![Watch the video](https://res.cloudinary.com/dzsu6hf5v/image/upload/c_thumb,w_200,g_face/v1730175196/Screenshot_2024-03-15_092203_uktaqv.png)](https://res.cloudinary.com/dzsu6hf5v/video/upload/v1729523339/project2_lyh01m.mp4)
+[![Watch the video](https://res.cloudinary.com/dzsu6hf5v/image/upload/v1730175196/Screenshot_2024-03-15_092203_uktaqv.png)](https://res.cloudinary.com/dzsu6hf5v/video/upload/v1729523339/project2_lyh01m.mp4)
 
 
 ## Contributing
